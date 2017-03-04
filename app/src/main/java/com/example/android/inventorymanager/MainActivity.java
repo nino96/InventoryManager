@@ -1,13 +1,18 @@
 package com.example.android.inventorymanager;
 
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -23,6 +28,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -30,10 +37,12 @@ public class MainActivity extends AppCompatActivity {
 
     private FirebaseDatabase mFireBaseDatabase;
     private DatabaseReference mUsersDatabaseReference;
+    private DatabaseReference mBusinessesReference;
     private ChildEventListener mChildEventListener;
     private FirebaseAuth mFireBaseAuth;
     private FirebaseAuth.AuthStateListener mAuthStateListener;
 
+    private static Toast mToast;
     private EditText mBusinessName;
     private Button mCreateBusinessButton;
     private Button mJoinBusinessButton;
@@ -46,17 +55,171 @@ public class MainActivity extends AppCompatActivity {
         mFireBaseDatabase = FirebaseDatabase.getInstance();
         mFireBaseAuth = FirebaseAuth.getInstance();
         mUsersDatabaseReference = mFireBaseDatabase.getReference().child("users");
+        mBusinessesReference = mFireBaseDatabase.getReference().child("businesses");
 
-        mBusinessName = (EditText)findViewById(R.id.et_business_name);
         mCreateBusinessButton = (Button)findViewById(R.id.bt_new_business);
         mJoinBusinessButton = (Button)findViewById(R.id.bt_join_business);
 
         mCreateBusinessButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                builder.setTitle("Enter business name");
+
+                final EditText input = new EditText(MainActivity.this);
+                builder.setView(input);
+
+                /*final AlertDialog dialog = new AlertDialog.Builder(this)
+                        .setView(input)
+                        .setTitle("Enter business name")
+                        .setPositiveButton("OK",null)
+                        .setNegativeButton("Cancel",null)
+                        .create();*/
+
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        final String businessname = input.getText().toString();
+                        //final DialogInterface workaround = dialog;              //need to be final to reference in inner class
+
+                        if (businessname.length() < 5) {
+                            if(mToast!=null)
+                                mToast.cancel();
+
+                            mToast = Toast.makeText(MainActivity.this, "Business name minimum 5 characters", Toast.LENGTH_LONG);
+                            mToast.show();
+
+                        } else {
+                            mBusinessesReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+                                    if (user!=null && !dataSnapshot.hasChild(businessname) ){
+
+                                        Map<String,String> temp = new HashMap<>();
+                                        mBusinessesReference.child(businessname).child("members").child(user.getDisplayName()).setValue(true);
+                                        mUsersDatabaseReference.child(user.getUid()).child("businesses").child(businessname).setValue(true);
+
+
+                                        if(mToast!=null)
+                                            mToast.cancel();
+
+                                        mToast = Toast.makeText(MainActivity.this,"Business created successfully",Toast.LENGTH_LONG);
+                                        mToast.show();
+                                        //workaround.dismiss();
+
+                                    }
+                                    else{
+                                        if(mToast!=null)
+                                            mToast.cancel();
+
+                                        mToast = Toast.makeText(MainActivity.this,"Business Name already taken!",Toast.LENGTH_LONG);
+                                        mToast.show();
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+                                    Log.e("DatabaseError","database error");
+                                }
+                            });
+                        }
+
+                    }
+                });
+
+
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+
+
+                builder.show();
+
 
             }
         });
+
+
+        mJoinBusinessButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+                if(user!=null) {
+                    final DatabaseReference businesses = mUsersDatabaseReference.child(user.getUid()).child("businesses");
+
+                    if(businesses==null){
+                        if(mToast!=null)
+                            mToast.cancel();
+
+                        mToast = Toast.makeText(MainActivity.this,"You are not part of any business",Toast.LENGTH_LONG);
+                        mToast.show();
+                    }
+                    else{
+
+                        //Start the progress dialog
+                        final ProgressDialog progressDialog = ProgressDialog.show(MainActivity.this, "",
+                                "Loading. Please wait...", true);
+
+
+
+                        final AlertDialog.Builder listDialog = new AlertDialog.Builder(MainActivity.this);
+                        listDialog.setTitle("Select Business");
+
+
+                        final ArrayAdapter<String> listBusinesses = new ArrayAdapter<>(MainActivity.this,android.R.layout.select_dialog_singlechoice);
+                        businesses.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                for(DataSnapshot snapshot: dataSnapshot.getChildren() ){
+                                    listBusinesses.add(snapshot.getKey());
+                                }
+
+                                listDialog.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        dialog.dismiss();
+                                    }
+                                });
+
+                                listDialog.setAdapter(listBusinesses, new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        String businessName = listBusinesses.getItem(which);
+
+                                        if(mToast!=null){
+                                            mToast.cancel();
+                                        }
+
+                                        mToast = Toast.makeText(MainActivity.this,businessName,Toast.LENGTH_LONG);
+                                        mToast.show();
+                                    }
+                                });
+
+                                progressDialog.dismiss();
+                                listDialog.show();
+
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+
+
+
+                    }
+                }
+            }
+        });
+
+
 
         mAuthStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -64,10 +227,10 @@ public class MainActivity extends AppCompatActivity {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
 
                 if(user!=null){
-                    onSignedInInitialize(user.getDisplayName());
+                    //onSignedInInitialize(user.getDisplayName());
                 }
                 else{
-                    onSignedOutCleanUp();
+                    //onSignedOutCleanUp();
                     startActivityForResult(
                             AuthUI.getInstance()
                                     .createSignInIntentBuilder()
@@ -98,16 +261,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public static class User{
-        public String username;
-        public String email;
 
-        public User(String username,String email){
-            this.email = email;
-            this.username = username;
-        }
-
-    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -123,7 +277,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                        if(!dataSnapshot.hasChild(user.getUid())){
+                        if(user!=null && !dataSnapshot.hasChild(user.getUid())){
                             mUsersDatabaseReference.child(user.getUid()).setValue(new User(user.getDisplayName(),user.getEmail()));
                         }
                     }
@@ -135,13 +289,20 @@ public class MainActivity extends AppCompatActivity {
                 });
 
 
+                if(mToast!=null)
+                    mToast.cancel();
 
-
-                Toast.makeText(this,"Signed in",Toast.LENGTH_SHORT).show();
+                mToast = Toast.makeText(this,"Signed in",Toast.LENGTH_SHORT);
+                mToast.show();
             }
 
             if(resultCode == RESULT_CANCELED){
-                Toast.makeText(this, "Login canceled", Toast.LENGTH_SHORT).show();
+                if(mToast!=null)
+                    mToast.cancel();
+
+                mToast = Toast.makeText(this, "Login canceled", Toast.LENGTH_SHORT);
+                mToast.show();
+
                 finish();
             }
 
@@ -170,7 +331,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void onSignedInInitialize(String username){
+    /*private void onSignedInInitialize(String username){
         //mUsername = username;
         //attachDatabaseListener();
     }
@@ -179,5 +340,5 @@ public class MainActivity extends AppCompatActivity {
         //mUsername = ANONYMOUS;
         //mMessageAdapter.clear();
         //detachDatabaseListener();
-    }
+    }*/
 }

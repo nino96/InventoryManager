@@ -11,20 +11,17 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.example.android.inventorymanager.MainActivity">
 
-    <EditText
-        android:id="@+id/et_business_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+
     <Button
         android:id="@+id/bt_new_business"
-        android:layout_width="wrap_content"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:text="Create new business"/>
     <Button
         android:id="@+id/bt_join_business"
-        android:layout_width="wrap_content"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:text="Join existing business"/>
+        android:text="Enter business"/>
 </LinearLayout>
