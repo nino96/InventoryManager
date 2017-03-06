@@ -33,9 +33,8 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
-    //La La La;
-
     public static final int RC_SIGN_IN = 1;
+    static boolean calledAlready = false;
 
     private FirebaseDatabase mFireBaseDatabase;
     private DatabaseReference mUsersDatabaseReference;
@@ -54,8 +53,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mFireBaseDatabase = FirebaseDatabase.getInstance();
-        mFireBaseDatabase.setPersistenceEnabled(true);
+        //call to setpersistence must be made before any other usage of FireBaseDatabase instance, therefore in Utils.java
+
+        mFireBaseDatabase = Utils.getDatabase();
+
 
         mFireBaseAuth = FirebaseAuth.getInstance();
         mUsersDatabaseReference = mFireBaseDatabase.getReference().child("users");
@@ -102,8 +103,9 @@ public class MainActivity extends AppCompatActivity {
                                     if (user!=null && !dataSnapshot.hasChild(businessname) ){
 
                                         Map<String,String> temp = new HashMap<>();
+                                        mBusinessesReference.child(businessname).child("owner").setValue(user.getUid());
                                         mBusinessesReference.child(businessname).child("members").child(user.getUid()).setValue(true);
-                                        mUsersDatabaseReference.child(user.getUid()).child("businesses").child(businessname).setValue(true);
+                                        mUsersDatabaseReference.child(user.getUid()).child("businesses").child(businessname).child("owner").setValue(true);
 
 
                                         if(mToast!=null)
@@ -161,6 +163,7 @@ public class MainActivity extends AppCompatActivity {
                         //Start the progress dialog
                         final ProgressDialog progressDialog = ProgressDialog.show(MainActivity.this, "",
                                 "Loading. Please wait...", true);
+                        progressDialog.setCancelable(true);
 
 
                         final AlertDialog.Builder listDialog = new AlertDialog.Builder(MainActivity.this);
@@ -198,7 +201,7 @@ public class MainActivity extends AppCompatActivity {
                                                 mToast.cancel();
                                             }
 
-                                            mToast = Toast.makeText(MainActivity.this, businessName, Toast.LENGTH_LONG);
+                                            mToast = Toast.makeText(MainActivity.this, businessName, Toast.LENGTH_SHORT);
                                             mToast.show();
                                         }
                                     });
@@ -223,6 +226,8 @@ public class MainActivity extends AppCompatActivity {
                             public void onCancelled(DatabaseError databaseError) {
 
                             }
+
+
                         });
                     }else{
                         if (mToast != null) {

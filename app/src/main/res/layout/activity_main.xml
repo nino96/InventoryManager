@@ -17,11 +17,11 @@
         android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:text="Create new business"/>
+        android:text="@string/create_new_business"/>
     <Button
         android:id="@+id/bt_join_business"
         android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:text="Enter business"/>
+        android:text="@string/enter_business"/>
 </LinearLayout>
