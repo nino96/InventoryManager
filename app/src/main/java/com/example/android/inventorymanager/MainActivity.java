@@ -53,6 +53,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         mFireBaseDatabase = FirebaseDatabase.getInstance();
+        mFireBaseDatabase.setPersistenceEnabled(true);
+
         mFireBaseAuth = FirebaseAuth.getInstance();
         mUsersDatabaseReference = mFireBaseDatabase.getReference().child("users");
         mBusinessesReference = mFireBaseDatabase.getReference().child("businesses");
@@ -98,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
                                     if (user!=null && !dataSnapshot.hasChild(businessname) ){
 
                                         Map<String,String> temp = new HashMap<>();
-                                        mBusinessesReference.child(businessname).child("members").child(user.getDisplayName()).setValue(true);
+                                        mBusinessesReference.child(businessname).child("members").child(user.getUid()).setValue(true);
                                         mUsersDatabaseReference.child(user.getUid()).child("businesses").child(businessname).setValue(true);
 
 
@@ -153,68 +155,82 @@ public class MainActivity extends AppCompatActivity {
                 if(user!=null) {
                     final DatabaseReference businesses = mUsersDatabaseReference.child(user.getUid()).child("businesses");
 
-                    if(businesses==null){
-                        if(mToast!=null)
-                            mToast.cancel();
-
-                        mToast = Toast.makeText(MainActivity.this,"You are not part of any business",Toast.LENGTH_LONG);
-                        mToast.show();
-                    }
-                    else{
-
+                    if (businesses != null) {
                         //Start the progress dialog
                         final ProgressDialog progressDialog = ProgressDialog.show(MainActivity.this, "",
                                 "Loading. Please wait...", true);
-
 
 
                         final AlertDialog.Builder listDialog = new AlertDialog.Builder(MainActivity.this);
                         listDialog.setTitle("Select Business");
 
 
-                        final ArrayAdapter<String> listBusinesses = new ArrayAdapter<>(MainActivity.this,android.R.layout.select_dialog_singlechoice);
+                        final ArrayAdapter<String> listBusinesses = new ArrayAdapter<>(MainActivity.this, android.R.layout.select_dialog_singlechoice);
                         businesses.addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
-                                for(DataSnapshot snapshot: dataSnapshot.getChildren() ){
+                                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
                                     listBusinesses.add(snapshot.getKey());
                                 }
 
-                                listDialog.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        dialog.dismiss();
-                                    }
-                                });
+                                if (listBusinesses.getCount() != 0) {
 
-                                listDialog.setAdapter(listBusinesses, new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        String businessName = listBusinesses.getItem(which);
 
-                                        if(mToast!=null){
-                                            mToast.cancel();
+                                    listDialog.setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            dialog.dismiss();
                                         }
+                                    });
 
-                                        mToast = Toast.makeText(MainActivity.this,businessName,Toast.LENGTH_LONG);
-                                        mToast.show();
+                                    listDialog.setAdapter(listBusinesses, new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+                                            String businessName = listBusinesses.getItem(which);
+
+                                            Intent businessHome = new Intent(MainActivity.this, BusinessHome.class);
+                                            businessHome.putExtra("businessName", businessName);
+                                            startActivity(businessHome);
+
+                                            if (mToast != null) {
+                                                mToast.cancel();
+                                            }
+
+                                            mToast = Toast.makeText(MainActivity.this, businessName, Toast.LENGTH_LONG);
+                                            mToast.show();
+                                        }
+                                    });
+
+                                    progressDialog.dismiss();
+                                    listDialog.show();
+                                } else {
+                                    progressDialog.dismiss();
+                                    if (mToast != null) {
+                                        mToast.cancel();
                                     }
-                                });
 
-                                progressDialog.dismiss();
-                                listDialog.show();
+                                    mToast = Toast.makeText(MainActivity.this, "You are not part of any business", Toast.LENGTH_LONG);
+                                    mToast.show();
+                                }
+
 
                             }
+
 
                             @Override
                             public void onCancelled(DatabaseError databaseError) {
 
                             }
                         });
+                    }else{
+                        if (mToast != null) {
+                            mToast.cancel();
+                        }
 
-
-
+                        mToast = Toast.makeText(MainActivity.this, "You are not part of any business", Toast.LENGTH_LONG);
+                        mToast.show();
                     }
+
                 }
             }
         });
