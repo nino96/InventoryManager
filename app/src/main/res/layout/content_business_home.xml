@@ -14,13 +14,6 @@
     tools:context="com.example.android.inventorymanager.BusinessHome"
     tools:showIn="@layout/app_bar_business_home">
 
-    <Button
-        android:id="@+id/bt_create_schema"
-        android:theme="@style/AppTheme.Button"
-        android:layout_height="wrap_content"
-        android:layout_width="200dp"
-        android:layout_gravity="center_horizontal"
-        android:text="@string/create_schema"
-        />
+
 
 </LinearLayout>

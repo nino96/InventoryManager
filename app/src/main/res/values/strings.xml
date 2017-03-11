@@ -11,4 +11,13 @@
     <string name="create_new_business">Create new business</string>
     <string name="enter_business">Enter business</string>
     <string name="create_schema">Create schema</string>
+
+
+    <string name="button_add_new_text">Add Custom Field</string>
+    <string name="button_delete_row_description">Delete</string>
+    <string-array name="types">
+        <item>String</item>
+        <item>Integer</item>
+
+    </string-array>
 </resources>

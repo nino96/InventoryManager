@@ -53,15 +53,6 @@ public class BusinessHome extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
 
-        Button mCreateSchemaButton = (Button)findViewById(R.id.bt_create_schema);
-        mCreateSchemaButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
-
-
     }
 
     @Override

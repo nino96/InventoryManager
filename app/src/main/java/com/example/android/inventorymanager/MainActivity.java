@@ -27,14 +27,23 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
     public static final int RC_SIGN_IN = 1;
+    public static final int RC_CREATE_SCHEMA = 2;
+
+    public static final String SCHEMA_ENTRY_NAME = "fieldName";
+    public static final String SCHEMA_ENTRY_TYPE = "fieldType";
     static boolean calledAlready = false;
+
+    //the name of business(es) created, not to be confused with businessName which holds selected business in Join Business dialog
+    private String businessname;
 
     private FirebaseDatabase mFireBaseDatabase;
     private DatabaseReference mUsersDatabaseReference;
@@ -62,6 +71,9 @@ public class MainActivity extends AppCompatActivity {
         mUsersDatabaseReference = mFireBaseDatabase.getReference().child("users");
         mBusinessesReference = mFireBaseDatabase.getReference().child("businesses");
 
+        mUsersDatabaseReference.keepSynced(true);
+        mBusinessesReference.keepSynced(true);
+
         mCreateBusinessButton = (Button)findViewById(R.id.bt_new_business);
         mJoinBusinessButton = (Button)findViewById(R.id.bt_join_business);
 
@@ -84,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
                 builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        final String businessname = input.getText().toString();
+                        businessname = input.getText().toString();
                         //final DialogInterface workaround = dialog;              //need to be final to reference in inner class
 
                         if (businessname.length() < 5) {
@@ -102,18 +114,12 @@ public class MainActivity extends AppCompatActivity {
 
                                     if (user!=null && !dataSnapshot.hasChild(businessname) ){
 
-                                        Map<String,String> temp = new HashMap<>();
-                                        mBusinessesReference.child(businessname).child("owner").setValue(user.getUid());
-                                        mBusinessesReference.child(businessname).child("members").child(user.getUid()).setValue(true);
-                                        mUsersDatabaseReference.child(user.getUid()).child("businesses").child(businessname).child("owner").setValue(true);
 
-
-                                        if(mToast!=null)
-                                            mToast.cancel();
-
-                                        mToast = Toast.makeText(MainActivity.this,"Business created successfully",Toast.LENGTH_LONG);
-                                        mToast.show();
-                                        //workaround.dismiss();
+                                        //start SchemaInput activity for result and if result is OK then create user and business
+                                        //mappings in onAcitivtyResult
+                                        Intent intent = new Intent(MainActivity.this,SchemaInput.class);
+                                        intent.putExtra("businessName",businessname);
+                                        startActivityForResult(intent,RC_CREATE_SCHEMA);
 
                                     }
                                     else{
@@ -191,7 +197,35 @@ public class MainActivity extends AppCompatActivity {
                                     listDialog.setAdapter(listBusinesses, new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
+
+                                            //not to be confused with businessname, which is holds name of last business created and it is
+                                            //global to this activity
                                             String businessName = listBusinesses.getItem(which);
+
+                                            //create the schema list from firebase
+                                            final List<SchemaEntry> fieldList = new ArrayList<SchemaEntry>();
+                                            mBusinessesReference.child(businessName).child("schema").addListenerForSingleValueEvent(new ValueEventListener() {
+                                                @Override
+                                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                                    for(DataSnapshot fields : dataSnapshot.getChildren()){
+
+                                                        HashMap<String,String> schemaField = (HashMap<String, String>) fields.getValue();
+                                                        String name = schemaField.get(SCHEMA_ENTRY_NAME);
+                                                        String type = schemaField.get(SCHEMA_ENTRY_TYPE);
+
+                                                        Log.v("Schema List",name+" "+type);
+                                                        fieldList.add(new SchemaEntry(name,type));
+                                                    }
+
+                                                    //now change system-wide schema list
+                                                    Utils.schemaEntryList = fieldList;
+                                                }
+
+                                                @Override
+                                                public void onCancelled(DatabaseError databaseError) {
+
+                                                }
+                                            });
 
                                             Intent businessHome = new Intent(MainActivity.this, BusinessHome.class);
                                             businessHome.putExtra("businessName", businessName);
@@ -208,6 +242,7 @@ public class MainActivity extends AppCompatActivity {
 
                                     progressDialog.dismiss();
                                     listDialog.show();
+
                                 } else {
                                     progressDialog.dismiss();
                                     if (mToast != null) {
@@ -327,6 +362,55 @@ public class MainActivity extends AppCompatActivity {
                 mToast.show();
 
                 finish();
+            }
+
+        }
+        else if(requestCode == RC_CREATE_SCHEMA){
+            if(resultCode == RESULT_OK){
+
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+                if(user!=null) {
+                    mBusinessesReference.child(businessname).child("owner").setValue(user.getUid());
+                    mBusinessesReference.child(businessname).child("members").child(user.getUid()).setValue(true);
+                    mUsersDatabaseReference.child(user.getUid()).child("businesses").child(businessname).child("owner").setValue(true);
+
+                    if(mToast!=null)
+                        mToast.cancel();
+
+                    mToast = Toast.makeText(MainActivity.this,"Business created successfully",Toast.LENGTH_LONG);
+                    mToast.show();
+                }
+                else{
+                    //remove any data that may have been created in SchemaInput activity
+                    if(mBusinessesReference.child(businessname)!=null){
+                        mBusinessesReference.child(businessname).setValue(null);
+                    }
+
+                    if(mToast!=null)
+                        mToast.cancel();
+
+                    mToast = Toast.makeText(MainActivity.this,"Business could not be created",Toast.LENGTH_LONG);
+                    mToast.show();
+                }
+
+
+
+            }
+
+            if(resultCode == RESULT_CANCELED){
+
+                //remove any data that may have been created in SchemaInput activity
+                //no changes made to users, so no need to check for that
+                if(mBusinessesReference.child(businessname)!=null){
+                    mBusinessesReference.child(businessname).setValue(null);
+                }
+
+                if(mToast!=null)
+                    mToast.cancel();
+
+                mToast = Toast.makeText(MainActivity.this,"Business could not be created",Toast.LENGTH_LONG);
+                mToast.show();
             }
 
         }

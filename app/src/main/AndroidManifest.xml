@@ -18,7 +18,10 @@
         <activity
             android:name=".BusinessHome"
             android:label="@string/title_activity_business_home"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".SchemaInput"
+            android:screenOrientation="portrait">
+        </activity>
     </application>
 
 </manifest>
