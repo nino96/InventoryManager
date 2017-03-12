@@ -18,6 +18,7 @@
         <activity
             android:name=".SchemaInput"
             android:screenOrientation="portrait" />
+
         <activity android:name=".AddItemActivity" />
 
         <activity android:name=".LauncherActivity"
@@ -27,6 +28,29 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+
+        <activity android:name=".SignUpActivity">
+
+            <!--
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            -->
+        </activity>
+        <activity android:name=".LoginActivity">
+
+            <!--
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            -->
+        </activity>
+        <activity android:name=".ResetPasswordActivity"></activity>
 
     </application>
 
