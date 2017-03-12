@@ -1,9 +1,12 @@
 package com.example.android.inventorymanager;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -18,11 +21,20 @@ import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class BusinessHome extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
 
     private String businessName;
+    private Button mAddItemButton;
+    private Button mViewInventoryButton;
+
+    private FirebaseDatabase mFirebaseDatabase;
+
+
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,9 +51,18 @@ public class BusinessHome extends AppCompatActivity
             }
         });*/
 
-        //Business Name passed on from the MainActivity
-        businessName = getIntent().getExtras().getString("businessName");
-        Toast.makeText(this, FirebaseAuth.getInstance().getCurrentUser().getDisplayName(),Toast.LENGTH_SHORT).show();
+        //Business Name from SharedPreferences
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        Log.v("BusHome",pref.getString("businessName","null"));
+        businessName = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString("businessName",null);
+        //Toast.makeText(this, FirebaseAuth.getInstance().getCurrentUser().getDisplayName(),Toast.LENGTH_SHORT).show();
+
+        mAddItemButton = (Button) findViewById(R.id.bt_add_item);
+        mViewInventoryButton = (Button) findViewById(R.id.bt_view_inventory);
+
+        mAddItemButton.setOnClickListener(this);
+        mViewInventoryButton.setOnClickListener(this);
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -53,6 +74,21 @@ public class BusinessHome extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
 
 
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch(v.getId()){
+            case R.id.bt_add_item:
+                Intent intent = new Intent(this,AddItemActivity.class);
+                startActivity(intent);
+
+                break;
+
+            case R.id.bt_view_inventory:
+                break;
+
+        }
     }
 
     @Override
@@ -84,6 +120,13 @@ public class BusinessHome extends AppCompatActivity
             return true;
         }
         else if(id == R.id.action_exit){
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            SharedPreferences.Editor editor = prefs.edit();
+
+            editor.remove("businessName");
+            editor.commit();
+
+
             Intent intent = new Intent(this,MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
             startActivity(intent);

@@ -14,6 +14,20 @@
     tools:context="com.example.android.inventorymanager.BusinessHome"
     tools:showIn="@layout/app_bar_business_home">
 
+    <Button
+        android:id="@+id/bt_add_item"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.Button"
+        android:text="Add Item"
+        />
 
+    <Button
+        android:id="@+id/bt_view_inventory"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.Button"
+        android:text="View Inventory"
+        />
 
 </LinearLayout>

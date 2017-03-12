@@ -9,11 +9,7 @@
         android:supportsRtl="false"
         android:theme="@style/AppTheme">
         <activity android:name=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".BusinessHome"
@@ -22,6 +18,18 @@
         <activity
             android:name=".SchemaInput"
             android:screenOrientation="portrait" />
+
+        <activity android:name=".AddItemActivity" />
+
+        <activity android:name=".LauncherActivity"
+            android:theme="@android:style/Theme.NoDisplay">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+
         <activity android:name=".SignUpActivity">
 
             <!--
@@ -43,6 +51,7 @@
             -->
         </activity>
         <activity android:name=".ResetPasswordActivity"></activity>
+
     </application>
 
 </manifest>

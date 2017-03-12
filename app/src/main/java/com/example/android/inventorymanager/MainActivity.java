@@ -3,7 +3,9 @@ package com.example.android.inventorymanager;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -43,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String SCHEMA_ENTRY_NAME = "fieldName";
     public static final String SCHEMA_ENTRY_TYPE = "fieldType";
+    public static final String SCHEMA_ENTRY_REQUIRED = "required";
+
     static boolean calledAlready = false;
 
     //the name of business(es) created, not to be confused with businessName which holds selected business in Join Business dialog
@@ -121,6 +125,10 @@ public class MainActivity extends AppCompatActivity {
 
                                         //start SchemaInput activity for result and if result is OK then create user and business
                                         //mappings in onAcitivtyResult
+
+
+
+
                                         Intent intent = new Intent(MainActivity.this,SchemaInput.class);
                                         intent.putExtra("businessName",businessname);
                                         startActivityForResult(intent,RC_CREATE_SCHEMA);
@@ -216,9 +224,14 @@ public class MainActivity extends AppCompatActivity {
                                                         HashMap<String,String> schemaField = (HashMap<String, String>) fields.getValue();
                                                         String name = schemaField.get(SCHEMA_ENTRY_NAME);
                                                         String type = schemaField.get(SCHEMA_ENTRY_TYPE);
+                                                        String required = schemaField.get(SCHEMA_ENTRY_REQUIRED);
 
-                                                        Log.v("Schema List",name+" "+type);
-                                                        fieldList.add(new SchemaEntry(name,type));
+                                                        Log.v("Schema List",name+" "+type+" "+required);
+
+                                                        if(required.equals("true"))
+                                                            fieldList.add(new SchemaEntry(name,type,true));
+                                                        else
+                                                            fieldList.add(new SchemaEntry(name,type,false));
                                                     }
 
                                                     //now change system-wide schema list
@@ -231,9 +244,19 @@ public class MainActivity extends AppCompatActivity {
                                                 }
                                             });
 
+
+                                            //putting into shared preferences, which makes Intent putExtra redundant
+                                            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                                            SharedPreferences.Editor edit = pref.edit();
+                                            Log.v("MainAct",businessName);
+                                            edit.putString("businessName",businessName);
+
+                                            edit.commit();
+
                                             Intent businessHome = new Intent(MainActivity.this, BusinessHome.class);
                                             businessHome.putExtra("businessName", businessName);
                                             startActivity(businessHome);
+                                            finish();
 
                                             if (mToast != null) {
                                                 mToast.cancel();

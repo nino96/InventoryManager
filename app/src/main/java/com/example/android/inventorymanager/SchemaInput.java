@@ -76,7 +76,7 @@ public class SchemaInput extends AppCompatActivity {
         tv = (TextView)rowNecesary.findViewById(R.id.tv_field_type);
         tv.setText("String");
         mNecessaryFields.addView(rowNecesary);
-        fieldList.add(new SchemaEntry("Name",Types.String.name()));
+        fieldList.add(new SchemaEntry(getString(R.string.field_name),Types.String.name(),true));
 
         rowNecesary = inflater.inflate(R.layout.row_necessary,null);
         tv = (TextView)rowNecesary.findViewById(R.id.tv_field_name);
@@ -84,7 +84,7 @@ public class SchemaInput extends AppCompatActivity {
         tv = (TextView)rowNecesary.findViewById(R.id.tv_field_type);
         tv.setText("Integer");
         mNecessaryFields.addView(rowNecesary);
-        fieldList.add(new SchemaEntry("Price",Types.Integer.name()));
+        fieldList.add(new SchemaEntry(getString(R.string.field_price),Types.Integer.name(),true));
 
         rowNecesary = inflater.inflate(R.layout.row_necessary,null);
         tv = (TextView)rowNecesary.findViewById(R.id.tv_field_name);
@@ -92,7 +92,7 @@ public class SchemaInput extends AppCompatActivity {
         tv = (TextView)rowNecesary.findViewById(R.id.tv_field_type);
         tv.setText("Integer");
         mNecessaryFields.addView(rowNecesary);
-        fieldList.add(new SchemaEntry("Quantity",Types.Integer.name()));
+        fieldList.add(new SchemaEntry(getString(R.string.field_quantity),Types.Integer.name(),true));
 
 
 
