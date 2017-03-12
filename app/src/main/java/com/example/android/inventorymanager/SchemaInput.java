@@ -117,7 +117,7 @@ public class SchemaInput extends AppCompatActivity {
 
                                         //getChildAt(i) will give inner linear layouts(direct children)
                                         //and not edit texts directly(nested children), so get inner linear layout
-                                        //but these could be the ones added by default which have alread been added to field list
+                                        //but these could be the ones added by default which have already been added to field list
                                         //so check if EditText is null, since those default ones have textviews
                                         LinearLayout inner = (LinearLayout) mContainerView.getChildAt(i);
                                         EditText et = (EditText) inner.findViewById(R.id.editText);

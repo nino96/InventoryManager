@@ -15,9 +15,11 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -26,6 +28,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -56,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText mBusinessName;
     private Button mCreateBusinessButton;
     private Button mJoinBusinessButton;
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -290,13 +294,7 @@ public class MainActivity extends AppCompatActivity {
                 else{
                     //onSignedOutCleanUp();
                     startActivityForResult(
-                            AuthUI.getInstance()
-                                    .createSignInIntentBuilder()
-                                    .setIsSmartLockEnabled(false)
-                                    .setProviders(Arrays.asList(new AuthUI.IdpConfig.Builder(AuthUI.EMAIL_PROVIDER).build(),
-                                            new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()
-                                    ))
-                                    .build(),
+                            new Intent(MainActivity.this, LoginActivity.class),
                             RC_SIGN_IN);
                 }
             }
@@ -430,8 +428,8 @@ public class MainActivity extends AppCompatActivity {
         switch(itemId){
             case R.id.sign_out_menu:
                 AuthUI.getInstance().signOut(this);
-                return true;
 
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
