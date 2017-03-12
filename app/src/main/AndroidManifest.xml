@@ -9,19 +9,25 @@
         android:supportsRtl="false"
         android:theme="@style/AppTheme">
         <activity android:name=".MainActivity">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".BusinessHome"
             android:label="@string/title_activity_business_home"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".SchemaInput"
-            android:screenOrientation="portrait">
+        <activity
+            android:name=".SchemaInput"
+            android:screenOrientation="portrait" />
+        <activity android:name=".AddItemActivity" />
+
+        <activity android:name=".LauncherActivity"
+            android:theme="@android:style/Theme.NoDisplay">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
+
     </application>
 
 </manifest>
