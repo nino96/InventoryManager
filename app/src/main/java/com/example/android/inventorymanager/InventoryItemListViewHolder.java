@@ -1,6 +1,7 @@
 package com.example.android.inventorymanager;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
@@ -33,6 +34,7 @@ public class InventoryItemListViewHolder extends RecyclerView.ViewHolder impleme
 
 
         mItemName.setText(item.Name);
+        mItemName.setTag(item.id);
         mItemPrice.setText("Price - "+item.Price);
         mItemQuantity.setText("Qty - "+item.Quantity);
 
@@ -43,6 +45,8 @@ public class InventoryItemListViewHolder extends RecyclerView.ViewHolder impleme
 
     @Override
     public void onClick(View v) {
-
+        Intent intent = new Intent(v.getContext(),InventoryItemDetail.class);
+        intent.putExtra("id",(String)v.findViewById(R.id.tv_inventory_list_itemname).getTag());
+        v.getContext().startActivity(intent);
     }
 }

@@ -56,6 +56,10 @@ public class Inventory extends AppCompatActivity {
 
             @Override
             protected void populateViewHolder(InventoryItemListViewHolder holder, InventoryListItem item, int position) {
+
+                item.id = getRef(position).getKey();
+                //Log.v("Item Detail",item.id);
+
                 holder.bindInventoryListItem(item);
             }
         };

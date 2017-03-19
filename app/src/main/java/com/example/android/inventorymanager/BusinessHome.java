@@ -58,7 +58,7 @@ public class BusinessHome extends AppCompatActivity
 
         //Business Name from SharedPreferences
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        Log.v("BusHome",pref.getString("businessName","null"));
+        //Log.v("BusHome",pref.getString("businessName","null"));
         businessName = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString("businessName",null);
         //Toast.makeText(this, FirebaseAuth.getInstance().getCurrentUser().getDisplayName(),Toast.LENGTH_SHORT).show();
 
@@ -114,19 +114,38 @@ public class BusinessHome extends AppCompatActivity
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                             String email = input.getText().toString();
-                            Log.v("BusinessHome",email);
+                            //Log.v("BusinessHome",email);
 
                             if(email.length()>0) {
+
+
+
                                 Query query = mUsersReference.orderByChild("email").equalTo(email);
 
                                 query.addChildEventListener(new ChildEventListener() {
                                     @Override
                                     public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
                                         if(dataSnapshot.getValue()!=null){
-                                            mBusinessesReference.child(businessName).child("members").child(dataSnapshot.getKey()).setValue(true);
-                                            mUsersReference.child(dataSnapshot.getKey()).child("businesses").child(businessName).child("owner").setValue(false);
 
-                                            Toast.makeText(BusinessHome.this,"Member added successfully",Toast.LENGTH_SHORT).show();
+
+                                            mUsersReference.child(dataSnapshot.getKey()).child("businesses").child(businessName).addListenerForSingleValueEvent(new ValueEventListener() {
+                                                @Override
+                                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                                    if(!dataSnapshot.exists()){
+                                                        mBusinessesReference.child(businessName).child("members").child(dataSnapshot.getKey()).setValue(true);
+                                                        mUsersReference.child(dataSnapshot.getKey()).child("businesses").child(businessName).child("owner").setValue(false);
+                                                        Toast.makeText(BusinessHome.this,"Member added successfully",Toast.LENGTH_SHORT).show();
+                                                    }
+                                                    else{
+                                                        Toast.makeText(BusinessHome.this,"Member already present",Toast.LENGTH_SHORT).show();
+                                                    }
+                                                }
+
+                                                @Override
+                                                public void onCancelled(DatabaseError databaseError) {
+
+                                                }
+                                            });
                                         }
 
                                     }

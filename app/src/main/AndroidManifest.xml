@@ -8,7 +8,7 @@
         android:label="@string/app_name"
         android:supportsRtl="false"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity"></activity>
+        <activity android:name=".MainActivity" />
         <activity
             android:name=".BusinessHome"
             android:label="@string/title_activity_business_home"
@@ -26,16 +26,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Authentication.SignUpActivity"></activity>
-        <activity android:name=".Authentication.LoginActivity"></activity>
-        <activity android:name=".Authentication.ResetPasswordActivity"></activity>
-
+        <activity android:name=".Authentication.SignUpActivity" />
+        <activity android:name=".Authentication.LoginActivity" />
+        <activity android:name=".Authentication.ResetPasswordActivity" />
         <activity
             android:name=".Inventory"
-            android:label="@string/title_activity_inventory"
-            >
-
-        </activity>
+            android:label="@string/title_activity_inventory"></activity>
+        <activity android:name=".InventoryItemDetail"></activity>
     </application>
 
 </manifest>

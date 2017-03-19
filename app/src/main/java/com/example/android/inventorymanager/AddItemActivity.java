@@ -206,7 +206,11 @@ public class AddItemActivity extends AppCompatActivity implements View.OnClickLi
 
                 Toast.makeText(getApplicationContext(),"Item Added",Toast.LENGTH_SHORT).show();
                 //finish(); allow user to add another item
+                for(Map.Entry<TextInputEditText,String> entry : fields.entrySet())
+                {
 
+                    entry.getKey().setText("");
+                }
 
             }
         }

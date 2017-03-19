@@ -5,6 +5,8 @@ package com.example.android.inventorymanager.Models;
  */
 
 public class InventoryListItem {
+
+    public String id;
     public String Name;
     public Integer Quantity;
     public Integer Price;
@@ -13,7 +15,8 @@ public class InventoryListItem {
 
     }
 
-    public InventoryListItem(String name,Integer qty,Integer price){
+    public InventoryListItem(String id,String name,Integer qty,Integer price){
+
         this.Name = name;
         this.Quantity = qty;
         this.Price = price;
