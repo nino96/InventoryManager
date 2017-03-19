@@ -1,11 +1,12 @@
 package com.example.android.inventorymanager;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
+import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -17,11 +18,17 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Toast;
 
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
+import com.example.android.inventorymanager.Utilities.Utils;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 public class BusinessHome extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, View.OnClickListener {
@@ -29,8 +36,11 @@ public class BusinessHome extends AppCompatActivity
     private String businessName;
     private Button mAddItemButton;
     private Button mViewInventoryButton;
+    private Button mAddMemberButton;
 
     private FirebaseDatabase mFirebaseDatabase;
+    private DatabaseReference mBusinessesReference;
+    private DatabaseReference mUsersReference;
 
 
 
@@ -42,14 +52,9 @@ public class BusinessHome extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        /*FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });*/
+        mFirebaseDatabase = Utils.getDatabase();
+        mUsersReference = mFirebaseDatabase.getReference().child("users");
+        mBusinessesReference = mFirebaseDatabase.getReference().child("businesses");
 
         //Business Name from SharedPreferences
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -57,11 +62,18 @@ public class BusinessHome extends AppCompatActivity
         businessName = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString("businessName",null);
         //Toast.makeText(this, FirebaseAuth.getInstance().getCurrentUser().getDisplayName(),Toast.LENGTH_SHORT).show();
 
+
+        //create the schema list from firebase
+        Utils.getSchemaEntryList(mBusinessesReference,businessName);
+
+
         mAddItemButton = (Button) findViewById(R.id.bt_add_item);
         mViewInventoryButton = (Button) findViewById(R.id.bt_view_inventory);
+        mAddMemberButton = (Button) findViewById(R.id.bt_add_member);
 
         mAddItemButton.setOnClickListener(this);
         mViewInventoryButton.setOnClickListener(this);
+        mAddMemberButton.setOnClickListener(this);
 
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -78,15 +90,96 @@ public class BusinessHome extends AppCompatActivity
 
     @Override
     public void onClick(View v) {
-        switch(v.getId()){
+        switch(v.getId())
+        {
             case R.id.bt_add_item:
                 Intent intent = new Intent(this,AddItemActivity.class);
                 startActivity(intent);
-
                 break;
 
             case R.id.bt_view_inventory:
+                intent = new Intent(this,Inventory.class);
+                startActivity(intent);
                 break;
+
+            case R.id.bt_add_member:
+                AlertDialog.Builder builder = new AlertDialog.Builder(BusinessHome.this);
+                builder.setTitle("Enter member email");
+
+                final EditText input = new EditText(BusinessHome.this);
+                input.setInputType(InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+                builder.setView(input);
+
+                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                            String email = input.getText().toString();
+                            Log.v("BusinessHome",email);
+
+                            if(email.length()>0) {
+                                Query query = mUsersReference.orderByChild("email").equalTo(email);
+
+                                query.addChildEventListener(new ChildEventListener() {
+                                    @Override
+                                    public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
+                                        if(dataSnapshot.getValue()!=null){
+                                            mBusinessesReference.child(businessName).child("members").child(dataSnapshot.getKey()).setValue(true);
+                                            mUsersReference.child(dataSnapshot.getKey()).child("businesses").child(businessName).child("owner").setValue(false);
+
+                                            Toast.makeText(BusinessHome.this,"Member added successfully",Toast.LENGTH_SHORT).show();
+                                        }
+
+                                    }
+
+                                    @Override
+                                    public void onChildRemoved(DataSnapshot dataSnapshot) {}
+
+                                    @Override
+                                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {}
+
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {}
+
+                                    @Override
+                                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {}
+                                });
+
+                                //if user doesn't exist
+                                query.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        if(!dataSnapshot.exists()){
+                                            Toast.makeText(BusinessHome.this,"No such user",Toast.LENGTH_SHORT).show();
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+
+                                    }
+                                });
+
+                            }
+                            else{
+                                Toast.makeText(BusinessHome.this,"Enter user's email address",Toast.LENGTH_SHORT).show();
+                            }
+
+
+                        }
+
+
+                });
+
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+                builder.show();
+
+                break;
+
 
         }
     }

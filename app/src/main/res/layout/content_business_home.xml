@@ -19,7 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:theme="@style/AppTheme.Button"
-        android:text="Add Item"
+        android:text="@string/add_item"
         />
 
     <Button
@@ -27,7 +27,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:theme="@style/AppTheme.Button"
-        android:text="View Inventory"
+        android:text="@string/view_inventory"
+        />
+
+    <Button
+        android:id="@+id/bt_add_member"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.Button"
+        android:text="@string/add_member"
         />
 
 </LinearLayout>

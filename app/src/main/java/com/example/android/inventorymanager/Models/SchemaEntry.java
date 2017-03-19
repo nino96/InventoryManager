@@ -1,4 +1,4 @@
-package com.example.android.inventorymanager;
+package com.example.android.inventorymanager.Models;
 
 import java.util.LinkedHashMap;
 import java.util.List;

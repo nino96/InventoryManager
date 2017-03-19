@@ -1,6 +1,5 @@
 package com.example.android.inventorymanager;
 
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.design.widget.TextInputLayout;
@@ -16,16 +15,14 @@ import android.support.design.widget.TextInputEditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
+import com.example.android.inventorymanager.Models.SchemaEntry;
+import com.example.android.inventorymanager.Utilities.Utils;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 public class AddItemActivity extends AppCompatActivity implements View.OnClickListener{
