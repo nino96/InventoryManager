@@ -7,10 +7,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.example.android.inventorymanager.Models.SchemaEntry;
+import com.example.android.inventorymanager.Utilities.Utils;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ import java.util.List;
 public class LauncherActivity extends AppCompatActivity {
 
     private DatabaseReference mBusinessesReference;
+    private Intent mIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

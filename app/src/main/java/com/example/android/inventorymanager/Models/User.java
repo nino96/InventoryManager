@@ -1,4 +1,4 @@
-package com.example.android.inventorymanager;
+package com.example.android.inventorymanager.Models;
 
 /**
  * Created by niyamshah on 04/03/17.

@@ -17,13 +17,14 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.example.android.inventorymanager.Models.SchemaEntry;
+import com.example.android.inventorymanager.Models.Types;
+import com.example.android.inventorymanager.Utilities.Utils;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 public class SchemaInput extends AppCompatActivity {
@@ -76,11 +77,11 @@ public class SchemaInput extends AppCompatActivity {
         tv = (TextView)rowNecesary.findViewById(R.id.tv_field_type);
         tv.setText("String");
         mNecessaryFields.addView(rowNecesary);
-        fieldList.add(new SchemaEntry(getString(R.string.field_name),Types.String.name(),true));
+        fieldList.add(new SchemaEntry(getString(R.string.field_name), Types.String.name(),true));
 
         rowNecesary = inflater.inflate(R.layout.row_necessary,null);
         tv = (TextView)rowNecesary.findViewById(R.id.tv_field_name);
-        tv.setText("Avg Price");
+        tv.setText("Cost Price");
         tv = (TextView)rowNecesary.findViewById(R.id.tv_field_type);
         tv.setText("Integer");
         mNecessaryFields.addView(rowNecesary);

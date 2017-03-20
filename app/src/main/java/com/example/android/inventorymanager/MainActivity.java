@@ -20,8 +20,10 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.example.android.inventorymanager.Authentication.LoginActivity;
+import com.example.android.inventorymanager.Models.User;
+import com.example.android.inventorymanager.Utilities.Utils;
 import com.firebase.ui.auth.AuthUI;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
@@ -30,13 +32,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.android.gms.tasks.Task;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -125,10 +120,6 @@ public class MainActivity extends AppCompatActivity {
 
                                         //start SchemaInput activity for result and if result is OK then create user and business
                                         //mappings in onAcitivtyResult
-
-
-
-
                                         Intent intent = new Intent(MainActivity.this,SchemaInput.class);
                                         intent.putExtra("businessName",businessname);
                                         startActivityForResult(intent,RC_CREATE_SCHEMA);
@@ -215,35 +206,7 @@ public class MainActivity extends AppCompatActivity {
                                             String businessName = listBusinesses.getItem(which);
 
                                             //create the schema list from firebase
-                                            final List<SchemaEntry> fieldList = new ArrayList<SchemaEntry>();
-                                            mBusinessesReference.child(businessName).child("schema").addListenerForSingleValueEvent(new ValueEventListener() {
-                                                @Override
-                                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                                    for(DataSnapshot fields : dataSnapshot.getChildren()){
-
-                                                        HashMap<String,String> schemaField = (HashMap<String, String>) fields.getValue();
-                                                        String name = schemaField.get(SCHEMA_ENTRY_NAME);
-                                                        String type = schemaField.get(SCHEMA_ENTRY_TYPE);
-                                                        String required = schemaField.get(SCHEMA_ENTRY_REQUIRED);
-
-                                                        Log.v("Schema List",name+" "+type+" "+required);
-
-                                                        if(required.equals("true"))
-                                                            fieldList.add(new SchemaEntry(name,type,true));
-                                                        else
-                                                            fieldList.add(new SchemaEntry(name,type,false));
-                                                    }
-
-                                                    //now change system-wide schema list
-                                                    Utils.schemaEntryList = fieldList;
-                                                }
-
-                                                @Override
-                                                public void onCancelled(DatabaseError databaseError) {
-
-                                                }
-                                            });
-
+                                            Utils.getSchemaEntryList(mBusinessesReference,businessName);
 
                                             //putting into shared preferences, which makes Intent putExtra redundant
                                             SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
