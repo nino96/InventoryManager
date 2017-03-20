@@ -10,6 +10,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
@@ -21,9 +28,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import android.util.Log;
 
-public class SignUpActivity extends AppCompatActivity {
+public class SignUpActivity extends AppCompatActivity /*implements GoogleApiClient.OnConnectionFailedListener*/{
 
     private EditText inputEmail, inputPassword,inputName;
+    private int RC_SIGN_IN = 100;
     private Button btnSignIn, btnSignUp, btnResetPassword;
     private ProgressBar progressBar;
     private FirebaseAuth auth;
@@ -111,10 +119,15 @@ public class SignUpActivity extends AppCompatActivity {
         //auth.addAuthStateListener(mAuthStateListener);
     }
 
+
     @Override
     protected void onResume() {
         super.onResume();
         //auth.addAuthStateListener(mAuthStateListener);
 
     }
+
+
+
+
 }
