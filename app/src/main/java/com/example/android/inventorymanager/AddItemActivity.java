@@ -17,9 +17,13 @@ import android.widget.Toast;
 
 import com.example.android.inventorymanager.Models.SchemaEntry;
 import com.example.android.inventorymanager.Utilities.Utils;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -32,8 +36,10 @@ public class AddItemActivity extends AppCompatActivity implements View.OnClickLi
 
     private String mBusinessName;
 
+    //the compulsory fields of the item
     private int price;
     private int quantity;
+    private String itemName;
 
     private FirebaseDatabase mFirebaseDatabase;
     private DatabaseReference mSchemaReference;
@@ -60,7 +66,7 @@ public class AddItemActivity extends AppCompatActivity implements View.OnClickLi
         mBusinessName = prefs.getString("businessName",null);
 
         mSchemaReference = mFirebaseDatabase.getReference("businesses").child(mBusinessName).child("schema");
-        mTransactionReference = mFirebaseDatabase.getReference("businesses").child(mBusinessName).child("transactions").child("outflow");
+        mTransactionReference = mFirebaseDatabase.getReference("businesses").child(mBusinessName).child("transactions");
         mItemsReference = mFirebaseDatabase.getReference("businesses").child(mBusinessName).child("items");
 
         createAddItemFormLayout(mAddItemLayout);
@@ -123,6 +129,7 @@ public class AddItemActivity extends AppCompatActivity implements View.OnClickLi
         
         try {
             n = Integer.parseInt(view.getText().toString());
+            Log.v("Add Item",n+"");
         }
         catch (NumberFormatException e){
             view.setError("Enter " + parent.getHint() + "(>0)");
@@ -137,10 +144,6 @@ public class AddItemActivity extends AppCompatActivity implements View.OnClickLi
             return false;
         }
         else {
-            if(parent.getHint().equals(getString(R.string.field_price)))
-                price = n;
-            else if(parent.getHint().equals(getString(R.string.field_quantity)))
-                quantity = n;
 
             //remove error from parent TextInputLayout
             parent.setErrorEnabled(false);
@@ -184,27 +187,61 @@ public class AddItemActivity extends AppCompatActivity implements View.OnClickLi
                 {
                     if(!validateNumberField(entry.getKey()))
                         flag = 0;
-                    else
+                    else{
+
+                        if(((TextInputLayout)entry.getKey().getParent().getParent()).getHint().equals("Price")){
+                            price = Integer.parseInt(fieldValue);
+                        }
+                        else if(((TextInputLayout)entry.getKey().getParent().getParent()).getHint().equals("Quantity")){
+                            quantity = Integer.parseInt(fieldValue);
+                        }
+                        Log.v("AddDebug",fieldValue);
                         itemList.put(fieldName,Integer.parseInt(fieldValue));
+                    }
                 }
                 else if(entry.getKey().getInputType() == InputType.TYPE_CLASS_TEXT)
                 {
                     if(!validateTextField(entry.getKey()))
                         flag = 0;
-                    else
-                        itemList.put(fieldName,fieldValue);
+                    else {
+                        TextInputLayout parent = (TextInputLayout) entry.getKey().getParent().getParent();
+                        if(parent.getHint().equals("Name"))
+                        {
+                            itemName = fieldValue;
+                        }
+                        itemList.put(fieldName, fieldValue);
+                    }
                 }
             }
 
             if(flag==1){
-                mItemsReference.push().setValue(itemList);
 
-                HashMap<String,Object> transaction = new LinkedHashMap<>();
-                transaction.put("timestamp",ServerValue.TIMESTAMP);
-                transaction.put("amount",price*quantity);
-                mTransactionReference.push().setValue(transaction);
+                mItemsReference.child(itemName).addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if(dataSnapshot.exists())
+                            Toast.makeText(getApplicationContext(),"Product already exists, view inventory",Toast.LENGTH_SHORT).show();
+                        else{
+                            mItemsReference.child(itemName).setValue(itemList);
 
-                Toast.makeText(getApplicationContext(),"Item Added",Toast.LENGTH_SHORT).show();
+                            HashMap<String,Object> transaction = new LinkedHashMap<>();
+                            transaction.put("timestamp",ServerValue.TIMESTAMP);
+                            Log.v("Add Item",price+" "+quantity);
+                            transaction.put("amount",price*quantity);
+                            transaction.put("item",itemName);
+                            transaction.put("user", FirebaseAuth.getInstance().getCurrentUser().getUid());
+                            mTransactionReference.child(itemName).push().setValue(transaction);
+
+                            Toast.makeText(getApplicationContext(),"Product Added",Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
                 //finish(); allow user to add another item
                 for(Map.Entry<TextInputEditText,String> entry : fields.entrySet())
                 {
