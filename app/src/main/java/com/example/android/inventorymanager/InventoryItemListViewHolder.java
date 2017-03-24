@@ -46,7 +46,7 @@ public class InventoryItemListViewHolder extends RecyclerView.ViewHolder impleme
     @Override
     public void onClick(View v) {
         Intent intent = new Intent(v.getContext(),InventoryItemDetail.class);
-        intent.putExtra("id",(String)v.findViewById(R.id.tv_inventory_list_itemname).getTag());
+        intent.putExtra("itemName",((TextView)v.findViewById(R.id.tv_inventory_list_itemname)).getText().toString());
         v.getContext().startActivity(intent);
     }
 }

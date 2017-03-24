@@ -23,7 +23,7 @@
 
 
     <string name="field_name">Name</string>
-    <string name="field_price">Cost Price</string>
+    <string name="field_price">Price</string>
     <string name="field_quantity">Quantity</string>
 
 
@@ -156,5 +156,7 @@
     <string name="inventorylist_quantity">Quantity</string>
     <string name="inventorylist_price">Price</string>
     <string name="inventorylist_name">ITEM NAME</string>
+    <string name="sell_unit">Sell Unit</string>
+    <string name="add_unit">Add Unit</string>
 
 </resources>

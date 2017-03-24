@@ -76,48 +76,48 @@ public class BusinessHome extends AppCompatActivity
         mAddMemberButton.setOnClickListener(this);
 
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        /*DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
+        navigationView.setNavigationItemSelectedListener(this);*/
 
 
     }
 
     @Override
     public void onClick(View v) {
-        switch(v.getId())
-        {
-            case R.id.bt_add_item:
-                Intent intent = new Intent(this,AddItemActivity.class);
-                startActivity(intent);
-                break;
 
-            case R.id.bt_view_inventory:
-                intent = new Intent(this,Inventory.class);
-                startActivity(intent);
-                break;
+        if(Utils.isOnline()) {
+            switch (v.getId()) {
+                case R.id.bt_add_item:
+                    Intent intent = new Intent(this, AddItemActivity.class);
+                    startActivity(intent);
+                    break;
 
-            case R.id.bt_add_member:
-                AlertDialog.Builder builder = new AlertDialog.Builder(BusinessHome.this);
-                builder.setTitle("Enter member email");
+                case R.id.bt_view_inventory:
+                    intent = new Intent(this, Inventory.class);
+                    startActivity(intent);
+                    break;
 
-                final EditText input = new EditText(BusinessHome.this);
-                input.setInputType(InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
-                builder.setView(input);
+                case R.id.bt_add_member:
+                    AlertDialog.Builder builder = new AlertDialog.Builder(BusinessHome.this);
+                    builder.setTitle("Enter member email");
 
-                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
+                    final EditText input = new EditText(BusinessHome.this);
+                    input.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+                    builder.setView(input);
+
+                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
                             String email = input.getText().toString();
                             //Log.v("BusinessHome",email);
 
-                            if(email.length()>0) {
-
+                            if (email.length() > 0) {
 
 
                                 Query query = mUsersReference.orderByChild("email").equalTo(email);
@@ -125,19 +125,18 @@ public class BusinessHome extends AppCompatActivity
                                 query.addChildEventListener(new ChildEventListener() {
                                     @Override
                                     public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
-                                        if(dataSnapshot.getValue()!=null){
+                                        if (dataSnapshot.getValue() != null) {
 
 
                                             mUsersReference.child(dataSnapshot.getKey()).child("businesses").child(businessName).addListenerForSingleValueEvent(new ValueEventListener() {
                                                 @Override
                                                 public void onDataChange(DataSnapshot dataSnapshot) {
-                                                    if(!dataSnapshot.exists()){
+                                                    if (!dataSnapshot.exists()) {
                                                         mBusinessesReference.child(businessName).child("members").child(dataSnapshot.getKey()).setValue(true);
                                                         mUsersReference.child(dataSnapshot.getKey()).child("businesses").child(businessName).child("owner").setValue(false);
-                                                        Toast.makeText(BusinessHome.this,"Member added successfully",Toast.LENGTH_SHORT).show();
-                                                    }
-                                                    else{
-                                                        Toast.makeText(BusinessHome.this,"Member already present",Toast.LENGTH_SHORT).show();
+                                                        Toast.makeText(BusinessHome.this, "Member added successfully", Toast.LENGTH_SHORT).show();
+                                                    } else {
+                                                        Toast.makeText(BusinessHome.this, "Member already present", Toast.LENGTH_SHORT).show();
                                                     }
                                                 }
 
@@ -151,24 +150,28 @@ public class BusinessHome extends AppCompatActivity
                                     }
 
                                     @Override
-                                    public void onChildRemoved(DataSnapshot dataSnapshot) {}
+                                    public void onChildRemoved(DataSnapshot dataSnapshot) {
+                                    }
 
                                     @Override
-                                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {}
+                                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                                    }
 
                                     @Override
-                                    public void onCancelled(DatabaseError databaseError) {}
+                                    public void onCancelled(DatabaseError databaseError) {
+                                    }
 
                                     @Override
-                                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {}
+                                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+                                    }
                                 });
 
                                 //if user doesn't exist
                                 query.addListenerForSingleValueEvent(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(DataSnapshot dataSnapshot) {
-                                        if(!dataSnapshot.exists()){
-                                            Toast.makeText(BusinessHome.this,"No such user",Toast.LENGTH_SHORT).show();
+                                        if (!dataSnapshot.exists()) {
+                                            Toast.makeText(BusinessHome.this, "No such user", Toast.LENGTH_SHORT).show();
                                         }
                                     }
 
@@ -178,28 +181,31 @@ public class BusinessHome extends AppCompatActivity
                                     }
                                 });
 
-                            }
-                            else{
-                                Toast.makeText(BusinessHome.this,"Enter user's email address",Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(BusinessHome.this, "Enter user's email address", Toast.LENGTH_SHORT).show();
                             }
 
 
                         }
 
 
-                });
+                    });
 
-                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                });
-                builder.show();
+                    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                        }
+                    });
+                    builder.show();
 
-                break;
+                    break;
 
 
+            }
+        }
+        else{
+            Toast.makeText(BusinessHome.this, "No network", Toast.LENGTH_SHORT).show();
         }
     }
 

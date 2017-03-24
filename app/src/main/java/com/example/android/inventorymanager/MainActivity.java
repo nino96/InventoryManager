@@ -83,11 +83,13 @@ public class MainActivity extends AppCompatActivity {
         mCreateBusinessButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                builder.setTitle("Enter business name");
 
-                final EditText input = new EditText(MainActivity.this);
-                builder.setView(input);
+                //if (Utils.isOnline()) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                    builder.setTitle("Enter business name");
+
+                    final EditText input = new EditText(MainActivity.this);
+                    builder.setView(input);
 
                 /*final AlertDialog dialog = new AlertDialog.Builder(this)
                         .setView(input)
@@ -96,67 +98,75 @@ public class MainActivity extends AppCompatActivity {
                         .setNegativeButton("Cancel",null)
                         .create();*/
 
-                builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        businessname = input.getText().toString();
-                        //final DialogInterface workaround = dialog;              //need to be final to reference in inner class
+                    builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            businessname = input.getText().toString();
+                            //final DialogInterface workaround = dialog;              //need to be final to reference in inner class
 
-                        if (businessname.length() < 5) {
-                            if(mToast!=null)
-                                mToast.cancel();
+                            if (businessname.length() < 5) {
+                                if (mToast != null)
+                                    mToast.cancel();
 
-                            mToast = Toast.makeText(MainActivity.this, "Business name minimum 5 characters", Toast.LENGTH_LONG);
-                            mToast.show();
+                                mToast = Toast.makeText(MainActivity.this, "Business name minimum 5 characters", Toast.LENGTH_LONG);
+                                mToast.show();
 
-                        } else {
-                            mBusinessesReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                            } else {
+                                mBusinessesReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-                                    if (user!=null && !dataSnapshot.hasChild(businessname) ){
+                                        if (user != null && !dataSnapshot.hasChild(businessname)) {
 
 
-                                        //start SchemaInput activity for result and if result is OK then create user and business
-                                        //mappings in onAcitivtyResult
-                                        Intent intent = new Intent(MainActivity.this,SchemaInput.class);
-                                        intent.putExtra("businessName",businessname);
-                                        startActivityForResult(intent,RC_CREATE_SCHEMA);
+                                            //start SchemaInput activity for result and if result is OK then create user and business
+                                            //mappings in onAcitivtyResult
+                                            Intent intent = new Intent(MainActivity.this, SchemaInput.class);
+                                            intent.putExtra("businessName", businessname);
+                                            startActivityForResult(intent, RC_CREATE_SCHEMA);
 
+                                        } else {
+                                            if (mToast != null)
+                                                mToast.cancel();
+
+                                            mToast = Toast.makeText(MainActivity.this, "Business Name already taken!", Toast.LENGTH_LONG);
+                                            mToast.show();
+                                        }
                                     }
-                                    else{
-                                        if(mToast!=null)
-                                            mToast.cancel();
 
-                                        mToast = Toast.makeText(MainActivity.this,"Business Name already taken!",Toast.LENGTH_LONG);
-                                        mToast.show();
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+                                        Log.e("DatabaseError", "database error");
                                     }
-                                }
+                                });
+                            }
 
-                                @Override
-                                public void onCancelled(DatabaseError databaseError) {
-                                    Log.e("DatabaseError","database error");
-                                }
-                            });
                         }
-
-                    }
-                });
+                    });
 
 
-                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                });
+                    builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                        }
+                    });
 
 
-                builder.show();
+                    builder.show();
 
 
+                //}
+                /*else{
+                    if (mToast != null)
+                        mToast.cancel();
+
+                    mToast = Toast.makeText(MainActivity.this, "No Network", Toast.LENGTH_LONG);
+                    mToast.show();
+                }*/
             }
+
         });
 
 

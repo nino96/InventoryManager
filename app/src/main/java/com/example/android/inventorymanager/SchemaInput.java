@@ -81,7 +81,7 @@ public class SchemaInput extends AppCompatActivity {
 
         rowNecesary = inflater.inflate(R.layout.row_necessary,null);
         tv = (TextView)rowNecesary.findViewById(R.id.tv_field_name);
-        tv.setText("Cost Price");
+        tv.setText("Price");
         tv = (TextView)rowNecesary.findViewById(R.id.tv_field_type);
         tv.setText("Integer");
         mNecessaryFields.addView(rowNecesary);

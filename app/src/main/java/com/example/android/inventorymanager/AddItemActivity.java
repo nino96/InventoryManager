@@ -26,6 +26,7 @@ import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -65,9 +66,17 @@ public class AddItemActivity extends AppCompatActivity implements View.OnClickLi
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         mBusinessName = prefs.getString("businessName",null);
 
+
+        //get schema list again
+        Utils.getSchemaEntryList(mFirebaseDatabase.getReference().child("businesses"),mBusinessName);
+
+
+
+
         mSchemaReference = mFirebaseDatabase.getReference("businesses").child(mBusinessName).child("schema");
         mTransactionReference = mFirebaseDatabase.getReference("businesses").child(mBusinessName).child("transactions");
         mItemsReference = mFirebaseDatabase.getReference("businesses").child(mBusinessName).child("items");
+        mItemsReference.keepSynced(true);
 
         createAddItemFormLayout(mAddItemLayout);
 
@@ -86,6 +95,7 @@ public class AddItemActivity extends AppCompatActivity implements View.OnClickLi
             et.setLayoutParams(layoutParams);
             et.setHint(entry.fieldName);
 
+            Log.v("Schema",entry.fieldName);
             Log.v("Add Item",entry.fieldName+" "+entry.fieldType);
 
 
@@ -114,6 +124,7 @@ public class AddItemActivity extends AppCompatActivity implements View.OnClickLi
             mAddItemLayout.addView(textInputLayout);
 
         }
+
 
         Button addItemButton = new Button(this);
         addItemButton.setId(R.id.bt_add_item);
@@ -177,79 +188,93 @@ public class AddItemActivity extends AppCompatActivity implements View.OnClickLi
         String fieldName;
         String fieldValue;
 
-        if(v.getId()==R.id.bt_add_item){
-            for(Map.Entry<TextInputEditText,String> entry : fields.entrySet())
-            {
-                fieldName = entry.getValue();
-                fieldValue = entry.getKey().getText().toString();
+        if(Utils.isOnline()) {
+            if (v.getId() == R.id.bt_add_item) {
+                for (Map.Entry<TextInputEditText, String> entry : fields.entrySet()) {
+                    fieldName = entry.getValue();
+                    fieldValue = entry.getKey().getText().toString();
 
-                if(entry.getKey().getInputType() == InputType.TYPE_CLASS_NUMBER)
-                {
-                    if(!validateNumberField(entry.getKey()))
-                        flag = 0;
-                    else{
+                    if (entry.getKey().getInputType() == InputType.TYPE_CLASS_NUMBER) {
+                        if (!validateNumberField(entry.getKey()))
+                            flag = 0;
+                        else {
 
-                        if(((TextInputLayout)entry.getKey().getParent().getParent()).getHint().equals("Price")){
-                            price = Integer.parseInt(fieldValue);
+                            if (((TextInputLayout) entry.getKey().getParent().getParent()).getHint().equals("Price")) {
+                                price = Integer.parseInt(fieldValue);
+                            } else if (((TextInputLayout) entry.getKey().getParent().getParent()).getHint().equals("Quantity")) {
+                                quantity = Integer.parseInt(fieldValue);
+                            }
+                            Log.v("AddDebug", fieldValue);
+                            itemList.put(fieldName, Integer.parseInt(fieldValue));
                         }
-                        else if(((TextInputLayout)entry.getKey().getParent().getParent()).getHint().equals("Quantity")){
-                            quantity = Integer.parseInt(fieldValue);
+                    } else if (entry.getKey().getInputType() == InputType.TYPE_CLASS_TEXT) {
+                        if (!validateTextField(entry.getKey()))
+                            flag = 0;
+                        else {
+                            TextInputLayout parent = (TextInputLayout) entry.getKey().getParent().getParent();
+                            if (parent.getHint().equals("Name")) {
+                                //don't put in the list if the field is name since name is being used as key now
+                                itemName = fieldValue;
+                            }
+                            itemList.put(fieldName, fieldValue);
+
                         }
-                        Log.v("AddDebug",fieldValue);
-                        itemList.put(fieldName,Integer.parseInt(fieldValue));
                     }
                 }
-                else if(entry.getKey().getInputType() == InputType.TYPE_CLASS_TEXT)
-                {
-                    if(!validateTextField(entry.getKey()))
-                        flag = 0;
-                    else {
+
+                if (flag == 1) {
+
+                    mItemsReference.child(itemName).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.exists())
+                                Toast.makeText(getApplicationContext(), "Product already exists, view inventory", Toast.LENGTH_SHORT).show();
+                            else {
+                                int count = 0;
+                                for (Map.Entry<String, Object> entry : itemList.entrySet()) {
+                                    Log.v("itemlist", entry.getKey());
+                                    String key = entry.getKey();
+                                    Object value = entry.getValue();
+
+                                    // now work with key and value...
+                                    mItemsReference.child(itemName).child(key).setValue(value);
+                                    mItemsReference.child(itemName).child(key).setPriority(count++);
+                                }
+
+                                HashMap<String, Object> transaction = new LinkedHashMap<>();
+                                transaction.put("timestamp", ServerValue.TIMESTAMP);
+                                Log.v("Add Item", price + " " + quantity);
+                                transaction.put("amount", price * quantity);
+                                transaction.put("user", FirebaseAuth.getInstance().getCurrentUser().getUid());
+                                mTransactionReference.child(itemName).child("outflow").push().setValue(transaction);
+
+                                //set Total Transaction value
+                                mTransactionReference.child(itemName).child("total").setValue(-(price*quantity));
+
+
+                                Toast.makeText(getApplicationContext(), "Product Added", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+
+                    //finish(); allow user to add another item
+                    for (Map.Entry<TextInputEditText, String> entry : fields.entrySet()) {
+
                         TextInputLayout parent = (TextInputLayout) entry.getKey().getParent().getParent();
-                        if(parent.getHint().equals("Name"))
-                        {
-                            itemName = fieldValue;
-                        }
-                        itemList.put(fieldName, fieldValue);
+                        entry.getKey().setText("");
+                        parent.setErrorEnabled(false);
                     }
+
                 }
             }
-
-            if(flag==1){
-
-                mItemsReference.child(itemName).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if(dataSnapshot.exists())
-                            Toast.makeText(getApplicationContext(),"Product already exists, view inventory",Toast.LENGTH_SHORT).show();
-                        else{
-                            mItemsReference.child(itemName).setValue(itemList);
-
-                            HashMap<String,Object> transaction = new LinkedHashMap<>();
-                            transaction.put("timestamp",ServerValue.TIMESTAMP);
-                            Log.v("Add Item",price+" "+quantity);
-                            transaction.put("amount",price*quantity);
-                            transaction.put("item",itemName);
-                            transaction.put("user", FirebaseAuth.getInstance().getCurrentUser().getUid());
-                            mTransactionReference.child(itemName).push().setValue(transaction);
-
-                            Toast.makeText(getApplicationContext(),"Product Added",Toast.LENGTH_SHORT).show();
-                        }
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
-
-                //finish(); allow user to add another item
-                for(Map.Entry<TextInputEditText,String> entry : fields.entrySet())
-                {
-
-                    entry.getKey().setText("");
-                }
-
-            }
+        }
+        else{
+            Toast.makeText(getApplicationContext(), "No Network", Toast.LENGTH_SHORT).show();
         }
     }
 

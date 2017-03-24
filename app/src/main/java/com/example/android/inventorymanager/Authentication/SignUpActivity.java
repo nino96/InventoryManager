@@ -1,4 +1,4 @@
-package com.example.android.inventorymanager;
+package com.example.android.inventorymanager.Authentication;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,16 +10,18 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
+//import com.example.android.inventorymanager.Authentication.LoginActivity;
+import com.example.android.inventorymanager.MainActivity;
+import com.example.android.inventorymanager.R;
+import com.example.android.inventorymanager.Utilities.Utils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import android.util.Log;
 
 public class SignUpActivity extends AppCompatActivity {
 
