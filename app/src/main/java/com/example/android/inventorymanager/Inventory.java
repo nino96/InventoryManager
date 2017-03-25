@@ -1,5 +1,6 @@
 package com.example.android.inventorymanager;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -11,6 +12,8 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
 
@@ -29,6 +32,7 @@ public class Inventory extends AppCompatActivity {
     private FirebaseDatabase mFirebaseDatabase;
     private DatabaseReference mItemsReference;
     private FirebaseRecyclerAdapter mFirebaseAdapter;
+    private LinearLayoutManager mLayoutManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,12 +49,12 @@ public class Inventory extends AppCompatActivity {
 
         mRecyclerView = (RecyclerView) findViewById(R.id.rv_item_list);
         mRecyclerView.setHasFixedSize(true);
-        LinearLayoutManager manager = new LinearLayoutManager(this);
-        mRecyclerView.setLayoutManager(manager);
+        mLayoutManager = new LinearLayoutManager(this);
+        mRecyclerView.setLayoutManager(mLayoutManager);
 
-        DividerItemDecoration mDividerItemDecoration = new DividerItemDecoration(mRecyclerView.getContext(),
+        /*DividerItemDecoration mDividerItemDecoration = new DividerItemDecoration(mRecyclerView.getContext(),
                 manager.getOrientation());
-        mRecyclerView.addItemDecoration(mDividerItemDecoration);
+        mRecyclerView.addItemDecoration(mDividerItemDecoration);*/
 
         mFirebaseAdapter = new FirebaseRecyclerAdapter<InventoryListItem,InventoryItemListViewHolder>(InventoryListItem.class,R.layout.inventory_list_item,InventoryItemListViewHolder.class,mItemsReference) {
 
@@ -67,6 +71,81 @@ public class Inventory extends AppCompatActivity {
 
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.inventory_list_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_sort_by_name) {
+            mFirebaseAdapter = new FirebaseRecyclerAdapter<InventoryListItem,InventoryItemListViewHolder>(InventoryListItem.class,R.layout.inventory_list_item,InventoryItemListViewHolder.class,mItemsReference.orderByChild("Name")) {
+
+                @Override
+                protected void populateViewHolder(InventoryItemListViewHolder holder, InventoryListItem item, int position) {
+
+                    item.id = getRef(position).getKey();
+                    //Log.v("Item Detail",item.id);
+
+                    holder.bindInventoryListItem(item);
+                }
+            };
+            mLayoutManager = new LinearLayoutManager(this);
+            mRecyclerView.setAdapter(mFirebaseAdapter);
+            mRecyclerView.setLayoutManager(mLayoutManager);
+        }
+        else if (id == R.id.action_sort_by_latest) {
+            mFirebaseAdapter = new FirebaseRecyclerAdapter<InventoryListItem,InventoryItemListViewHolder>(InventoryListItem.class,R.layout.inventory_list_item,InventoryItemListViewHolder.class,mItemsReference.orderByPriority()) {
+
+                @Override
+                protected void populateViewHolder(InventoryItemListViewHolder holder, InventoryListItem item, int position) {
+
+                    item.id = getRef(position).getKey();
+                    //Log.v("Item Detail",item.id);
+
+                    holder.bindInventoryListItem(item);
+                }
+            };
+
+            mLayoutManager = new LinearLayoutManager(this);
+            mLayoutManager.setReverseLayout(true);
+            mLayoutManager.setStackFromEnd(true);
+
+            mRecyclerView.swapAdapter(mFirebaseAdapter,false);
+            mRecyclerView.setLayoutManager(mLayoutManager);
+        }
+        else if (id == R.id.action_sort_by_quantity) {
+            mFirebaseAdapter = new FirebaseRecyclerAdapter<InventoryListItem,InventoryItemListViewHolder>(InventoryListItem.class,R.layout.inventory_list_item,InventoryItemListViewHolder.class,mItemsReference.orderByChild("Quantity")) {
+
+                @Override
+                protected void populateViewHolder(InventoryItemListViewHolder holder, InventoryListItem item, int position) {
+
+                    item.id = getRef(position).getKey();
+                    //Log.v("Item Detail",item.id);
+
+                    holder.bindInventoryListItem(item);
+                }
+            };
+            mLayoutManager = new LinearLayoutManager(this);
+            mLayoutManager.setReverseLayout(true);
+            mLayoutManager.setStackFromEnd(true);
+
+            mRecyclerView.swapAdapter(mFirebaseAdapter,false);
+            mRecyclerView.setLayoutManager(mLayoutManager);
+
+        }
+
+
+        return super.onOptionsItemSelected(item);
+    }
     @Override
     protected void onDestroy() {
         super.onDestroy();

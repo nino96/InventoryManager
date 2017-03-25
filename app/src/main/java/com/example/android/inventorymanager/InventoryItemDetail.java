@@ -8,6 +8,11 @@ import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.text.InputType;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,8 +24,11 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.android.inventorymanager.Models.InventoryListItem;
 import com.example.android.inventorymanager.Models.ItemDetail;
 import com.example.android.inventorymanager.Utilities.Utils;
+import com.firebase.ui.database.FirebaseListAdapter;
+import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -38,6 +46,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import static android.R.id.input;
+import static android.text.InputType.TYPE_CLASS_TEXT;
 import static com.example.android.inventorymanager.MainActivity.RC_CREATE_SCHEMA;
 
 public class InventoryItemDetail extends AppCompatActivity implements View.OnClickListener{
@@ -46,9 +55,8 @@ public class InventoryItemDetail extends AppCompatActivity implements View.OnCli
     private String businessName;
 
     private LinearLayout mParent;
-    private ListView mDetails;
-    private List<ItemDetail> mList;
-    private ArrayAdapter<ItemDetail> arrayAdapter;
+    private RecyclerView mDetails;
+    private ArrayList<ItemDetail> mList;
 
     private Button mSellItem;
     private Button mAddItem;
@@ -58,6 +66,7 @@ public class InventoryItemDetail extends AppCompatActivity implements View.OnCli
 
     private Toast mToast;
 
+    private ItemDetailAdapter arrayAdapter;
     private FirebaseDatabase mFirebaseDatabase;
     private DatabaseReference mItemReference;
     private DatabaseReference mTransactionReference;
@@ -70,10 +79,9 @@ public class InventoryItemDetail extends AppCompatActivity implements View.OnCli
         //get Database
         mFirebaseDatabase = Utils.getDatabase();
 
-        arrayAdapter = null;
+
         mParent = (LinearLayout) findViewById(R.id.activity_inventory_item_detail);
-        mDetails = (ListView) findViewById(R.id.lv_item_detail);
-        mList = new ArrayList<ItemDetail>();
+        mDetails = (RecyclerView) findViewById(R.id.rv_item_detail);
 
 
         mSellItem = (Button) findViewById(R.id.bt_sell_unit);
@@ -91,46 +99,27 @@ public class InventoryItemDetail extends AppCompatActivity implements View.OnCli
         mItemReference.keepSynced(true);
         mTransactionReference = mFirebaseDatabase.getReference().child("businesses").child(businessName).child("transactions").child(itemName);
 
-        //populate list
-        getFieldValues();
-        arrayAdapter = new ArrayAdapter<ItemDetail>(InventoryItemDetail.this, android.R.layout.simple_list_item_2, android.R.id.text1, mList) {
 
-            @Override
-            public View getView(int position, View convertView, ViewGroup parent) {
-                View view = super.getView(position, convertView, parent);
-                TextView text1 = (TextView) view.findViewById(android.R.id.text1);
-                TextView text2 = (TextView) view.findViewById(android.R.id.text2);
+        mList = getFieldValues();
+        arrayAdapter = new ItemDetailAdapter(mList);
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+        DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(mDetails.getContext(),
+                DividerItemDecoration.VERTICAL);
 
-                text1.setText(mList.get(position).name);
-                text1.setTypeface(null, Typeface.BOLD);
-                text2.setText(mList.get(position).value);
-                return view;
-            }
-        };
+        mDetails.addItemDecoration(dividerItemDecoration);
+        mDetails.setLayoutManager(mLayoutManager);
+        mDetails.setItemAnimator(new DefaultItemAnimator());
         mDetails.setAdapter(arrayAdapter);
 
-    }
 
 
-    private void getFieldValues(){
-
-        if(!mList.isEmpty())
-            mList.clear();
-        mItemReference.addListenerForSingleValueEvent(new ValueEventListener() {
+        mItemReference.child("Quantity").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                for(DataSnapshot snapshot: dataSnapshot.getChildren()){
-                    ItemDetail i = new ItemDetail();
-                    i.name = snapshot.getKey();
-                    i.value = snapshot.getValue().toString();
-
-                    if(i.name.equals("Price"))
-                        price = Integer.parseInt(i.value);
-                    else if(i.name.equals("Quantity"))
-                        quantity = Integer.parseInt(i.value);
-
-                    Log.v("ItemDetail",i.name+" "+i.value);
-                    mList.add(i);
+                if(dataSnapshot!=null){
+                    ItemDetail i = mList.get(2);
+                    i.value = Long.toString((Long)dataSnapshot.getValue());
+                    arrayAdapter.notifyDataSetChanged();
                 }
             }
 
@@ -153,7 +142,6 @@ public class InventoryItemDetail extends AppCompatActivity implements View.OnCli
 
                 case R.id.bt_add_unit:
                     getBoughtUnits();
-
                     break;
 
             }
@@ -161,6 +149,38 @@ public class InventoryItemDetail extends AppCompatActivity implements View.OnCli
         else{
             Toast.makeText(this,"No Network",Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private ArrayList<ItemDetail> getFieldValues(){
+
+        final ArrayList<ItemDetail> list = new ArrayList<>();
+        /*if(!mList.isEmpty())
+            mList.clear();*/
+        mItemReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for(DataSnapshot snapshot: dataSnapshot.getChildren()){
+                    ItemDetail i = new ItemDetail();
+                    i.name = snapshot.getKey();
+                    i.value = snapshot.getValue().toString();
+
+                    if(i.name.equals("CostPrice"))
+                        price = Integer.parseInt(i.value);
+                    else if(i.name.equals("Quantity"))
+                        quantity = Integer.parseInt(i.value);
+
+                    Log.v("ItemDetail",i.name+" "+i.value);
+                    list.add(i);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        return list;
     }
 
 
@@ -219,7 +239,7 @@ public class InventoryItemDetail extends AppCompatActivity implements View.OnCli
                                 transaction.put("user", FirebaseAuth.getInstance().getCurrentUser().getUid());
                                 mTransactionReference.child("inflow").push().setValue(transaction);
 
-                                mTransactionReference.child("total").runTransaction(new Transaction.Handler() {
+                                mTransactionReference.child("total_inflow").runTransaction(new Transaction.Handler() {
                                     @Override
                                     public Transaction.Result doTransaction(MutableData mutableData) {
                                         long sum = (Long)mutableData.getValue();
@@ -291,6 +311,111 @@ public class InventoryItemDetail extends AppCompatActivity implements View.OnCli
 
 
     private void getBoughtUnits(){
-        AlertDialog dialog;
+
+        final AlertDialog alertDialog = new AlertDialog.Builder(this)
+                .setPositiveButton("Ok",null)
+                .setNegativeButton("Cancel",null)
+                .create();
+        alertDialog.setTitle("Add Unit");
+
+        final EditText input = new EditText(this);
+        input.setInputType(InputType.TYPE_CLASS_NUMBER);
+        input.setHint("Enter quantity");
+
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.MATCH_PARENT);
+        input.setLayoutParams(lp);
+        alertDialog.setView(input);
+
+        alertDialog.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                Button button = alertDialog.getButton(DialogInterface.BUTTON_POSITIVE);
+                button.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if(input.getText().toString().length()==0){
+                            Toast.makeText(InventoryItemDetail.this,"Enter quantity",Toast.LENGTH_SHORT).show();
+                        }
+                        else{
+
+                            final int p = price;
+                            final int qty = Integer.parseInt(input.getText().toString());
+
+                            //write transaction in outflow
+                            HashMap<String, Object> transaction = new LinkedHashMap<>();
+                            transaction.put("timestamp", ServerValue.TIMESTAMP);
+                            transaction.put("amount", p * qty);
+                            transaction.put("user", FirebaseAuth.getInstance().getCurrentUser().getUid());
+                            mTransactionReference.child("outflow").push().setValue(transaction);
+
+                            mTransactionReference.child("total_outflow").runTransaction(new Transaction.Handler() {
+                                @Override
+                                public Transaction.Result doTransaction(MutableData mutableData) {
+                                    long sum = (Long)mutableData.getValue();
+
+                                    sum = sum + (p*qty);
+                                    mutableData.setValue(sum);
+
+                                    Log.v("Total",sum+"");
+                                    return Transaction.success(mutableData);
+                                }
+
+                                @Override
+                                public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+                                    if(mToast!=null)
+                                        mToast.cancel();
+
+                                    mToast = Toast.makeText(InventoryItemDetail.this,"Successful",Toast.LENGTH_SHORT);
+                                    mToast.show();
+
+                                }
+                            });
+
+
+
+                            //hardcoding the retrieval of quantity field since always going to be 3rd field in the list
+                            final ItemDetail quantity_text_view = mList.get(2);
+                            //reduce quantity
+                            mItemReference.child("Quantity").runTransaction(new Transaction.Handler() {
+                                @Override
+                                public Transaction.Result doTransaction(MutableData mutableData) {
+                                    long q = (Long)mutableData.getValue();
+                                    //priority = (Long)mutableData.getPriority();
+
+
+                                    q = q + qty;
+                                    mutableData.setValue(q);
+                                    quantity_text_view.value = Long.toString(q);
+                                    //mutableData.setPriority(priority);
+
+                                    return Transaction.success(mutableData);
+                                }
+
+                                @Override
+                                public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+                                    //Toast.makeText(InventoryItemDetail.this,"Successful",Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                            //if all sold then remove item from database or maybe not
+                            //hardcoding setPriority since setPriority deletes priority when done on mutableData inside
+                            //the above handler
+                            mItemReference.child("Quantity").setPriority(2);
+
+                            //update the member variable quantity
+                            mList.set(2,quantity_text_view);
+                            quantity = Integer.parseInt(mList.get(2).value);
+
+
+                            alertDialog.dismiss();
+
+                        }
+                    }
+                });
+            }
+        });
+        alertDialog.show();
+
     }
 }

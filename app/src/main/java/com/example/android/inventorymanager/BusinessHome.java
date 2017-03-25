@@ -61,6 +61,7 @@ public class BusinessHome extends AppCompatActivity
         //Log.v("BusHome",pref.getString("businessName","null"));
         businessName = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString("businessName",null);
         //Toast.makeText(this, FirebaseAuth.getInstance().getCurrentUser().getDisplayName(),Toast.LENGTH_SHORT).show();
+        this.setTitle(businessName);
 
 
         //create the schema list from firebase
@@ -127,17 +128,20 @@ public class BusinessHome extends AppCompatActivity
                                     public void onChildAdded(DataSnapshot dataSnapshot, String prevChildKey) {
                                         if (dataSnapshot.getValue() != null) {
 
+                                            Log.v("BusinessName",dataSnapshot.getKey());
 
-                                            mUsersReference.child(dataSnapshot.getKey()).child("businesses").child(businessName).addListenerForSingleValueEvent(new ValueEventListener() {
+                                            mUsersReference.child(dataSnapshot.getKey()).addListenerForSingleValueEvent(new ValueEventListener() {
                                                 @Override
                                                 public void onDataChange(DataSnapshot dataSnapshot) {
-                                                    if (!dataSnapshot.exists()) {
+                                                    if(!dataSnapshot.hasChild("businesses") || !dataSnapshot.child("businesses").hasChild(businessName)){
                                                         mBusinessesReference.child(businessName).child("members").child(dataSnapshot.getKey()).setValue(true);
                                                         mUsersReference.child(dataSnapshot.getKey()).child("businesses").child(businessName).child("owner").setValue(false);
                                                         Toast.makeText(BusinessHome.this, "Member added successfully", Toast.LENGTH_SHORT).show();
-                                                    } else {
+                                                    }
+                                                    else{
                                                         Toast.makeText(BusinessHome.this, "Member already present", Toast.LENGTH_SHORT).show();
                                                     }
+
                                                 }
 
                                                 @Override

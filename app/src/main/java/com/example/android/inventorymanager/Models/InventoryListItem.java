@@ -6,10 +6,14 @@ package com.example.android.inventorymanager.Models;
 
 public class InventoryListItem {
 
+    public static final String PRICE_FIELD="CostPrice";
+    public static final String QUANTITY_FIELD="Quantity";
+    public static final String NAME_FIELD="Name";
+
     public String id;
     public String Name;
     public Integer Quantity;
-    public Integer Price;
+    public Integer CostPrice;
 
     public InventoryListItem(){
 
@@ -19,7 +23,7 @@ public class InventoryListItem {
 
         this.Name = name;
         this.Quantity = qty;
-        this.Price = price;
+        this.CostPrice = price;
     }
 
     /*public String getItemName(){

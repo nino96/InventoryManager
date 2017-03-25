@@ -100,7 +100,7 @@ public class Utils {
         try{
             //Give the task 5 seconds to complete
             //if not it raises a timeout exception
-            Boolean result = future.get(2, TimeUnit.SECONDS);
+            Boolean result = future.get(1, TimeUnit.SECONDS);
             //finished in time
             return result;
         }catch (TimeoutException ex){

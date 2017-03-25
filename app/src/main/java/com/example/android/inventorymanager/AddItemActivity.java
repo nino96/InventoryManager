@@ -15,6 +15,7 @@ import android.support.design.widget.TextInputEditText;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import com.example.android.inventorymanager.Models.InventoryListItem;
 import com.example.android.inventorymanager.Models.SchemaEntry;
 import com.example.android.inventorymanager.Utilities.Utils;
 import com.google.firebase.auth.FirebaseAuth;
@@ -22,7 +23,9 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
 import com.google.firebase.database.ServerValue;
+import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
@@ -37,6 +40,9 @@ public class AddItemActivity extends AppCompatActivity implements View.OnClickLi
 
     private String mBusinessName;
 
+
+
+
     //the compulsory fields of the item
     private int price;
     private int quantity;
@@ -46,6 +52,7 @@ public class AddItemActivity extends AppCompatActivity implements View.OnClickLi
     private DatabaseReference mSchemaReference;
     private DatabaseReference mTransactionReference;
     private DatabaseReference mItemsReference;
+    private DatabaseReference mCountReference;
 
     private LinearLayout mAddItemLayout;
     private Button mSubmitButton;
@@ -76,6 +83,7 @@ public class AddItemActivity extends AppCompatActivity implements View.OnClickLi
         mSchemaReference = mFirebaseDatabase.getReference("businesses").child(mBusinessName).child("schema");
         mTransactionReference = mFirebaseDatabase.getReference("businesses").child(mBusinessName).child("transactions");
         mItemsReference = mFirebaseDatabase.getReference("businesses").child(mBusinessName).child("items");
+        mCountReference = mFirebaseDatabase.getReference("businesses").child(mBusinessName);
         mItemsReference.keepSynced(true);
 
         createAddItemFormLayout(mAddItemLayout);
@@ -199,9 +207,9 @@ public class AddItemActivity extends AppCompatActivity implements View.OnClickLi
                             flag = 0;
                         else {
 
-                            if (((TextInputLayout) entry.getKey().getParent().getParent()).getHint().equals("Price")) {
+                            if (((TextInputLayout) entry.getKey().getParent().getParent()).getHint().equals(InventoryListItem.PRICE_FIELD)) {
                                 price = Integer.parseInt(fieldValue);
-                            } else if (((TextInputLayout) entry.getKey().getParent().getParent()).getHint().equals("Quantity")) {
+                            } else if (((TextInputLayout) entry.getKey().getParent().getParent()).getHint().equals(InventoryListItem.QUANTITY_FIELD)) {
                                 quantity = Integer.parseInt(fieldValue);
                             }
                             Log.v("AddDebug", fieldValue);
@@ -212,7 +220,7 @@ public class AddItemActivity extends AppCompatActivity implements View.OnClickLi
                             flag = 0;
                         else {
                             TextInputLayout parent = (TextInputLayout) entry.getKey().getParent().getParent();
-                            if (parent.getHint().equals("Name")) {
+                            if (parent.getHint().equals(InventoryListItem.NAME_FIELD)) {
                                 //don't put in the list if the field is name since name is being used as key now
                                 itemName = fieldValue;
                             }
@@ -223,6 +231,9 @@ public class AddItemActivity extends AppCompatActivity implements View.OnClickLi
                 }
 
                 if (flag == 1) {
+
+
+
 
                     mItemsReference.child(itemName).addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
@@ -241,6 +252,24 @@ public class AddItemActivity extends AppCompatActivity implements View.OnClickLi
                                     mItemsReference.child(itemName).child(key).setPriority(count++);
                                 }
 
+
+                                mCountReference.child("count").addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        if(!dataSnapshot.exists()){
+                                            mCountReference.child("count").setValue(0);
+                                        }
+
+                                        mItemsReference.child(itemName).setPriority(dataSnapshot.getValue());
+
+                                    }
+
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+
+                                    }
+                                });
+
                                 HashMap<String, Object> transaction = new LinkedHashMap<>();
                                 transaction.put("timestamp", ServerValue.TIMESTAMP);
                                 Log.v("Add Item", price + " " + quantity);
@@ -249,7 +278,9 @@ public class AddItemActivity extends AppCompatActivity implements View.OnClickLi
                                 mTransactionReference.child(itemName).child("outflow").push().setValue(transaction);
 
                                 //set Total Transaction value
-                                mTransactionReference.child(itemName).child("total").setValue(-(price*quantity));
+                                mTransactionReference.child(itemName).child("total_outflow").setValue((price*quantity));
+                                mTransactionReference.child(itemName).child("total_inflow").setValue(0);
+
 
 
                                 Toast.makeText(getApplicationContext(), "Product Added", Toast.LENGTH_SHORT).show();
@@ -262,13 +293,33 @@ public class AddItemActivity extends AppCompatActivity implements View.OnClickLi
                         }
                     });
 
-                    //finish(); allow user to add another item
+
+                    mCountReference.child("count").runTransaction(new Transaction.Handler() {
+                        @Override
+                        public Transaction.Result doTransaction(MutableData mutableData) {
+                            long count = (Long)mutableData.getValue();
+
+                            count++;
+                            mutableData.setValue(count);
+
+
+                            return Transaction.success(mutableData);
+                        }
+
+                        @Override
+                        public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+
+                        }
+                    });
+
+                    //finish(); //allow user to add another item
                     for (Map.Entry<TextInputEditText, String> entry : fields.entrySet()) {
 
                         TextInputLayout parent = (TextInputLayout) entry.getKey().getParent().getParent();
                         entry.getKey().setText("");
                         parent.setErrorEnabled(false);
                     }
+                    fields.entrySet().iterator().next().getKey().requestFocus();
 
                 }
             }
@@ -293,7 +344,7 @@ public class AddItemActivity extends AppCompatActivity implements View.OnClickLi
         }
 
         public void afterTextChanged(Editable editable) {
-            switch ((view.getInputType())) {
+            /*switch ((view.getInputType())) {
                 case InputType.TYPE_CLASS_NUMBER:
                     validateNumberField(view);
                     break;
@@ -301,7 +352,7 @@ public class AddItemActivity extends AppCompatActivity implements View.OnClickLi
                 case InputType.TYPE_CLASS_TEXT:
                     validateTextField(view);
                     break;
-            }
+            }*/
         }
     }
 }

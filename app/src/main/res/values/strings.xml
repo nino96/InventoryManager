@@ -23,7 +23,7 @@
 
 
     <string name="field_name">Name</string>
-    <string name="field_price">Price</string>
+    <string name="field_price">CostPrice</string>
     <string name="field_quantity">Quantity</string>
 
 
