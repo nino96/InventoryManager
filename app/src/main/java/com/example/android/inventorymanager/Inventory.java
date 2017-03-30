@@ -16,6 +16,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.bumptech.glide.util.Util;
 import com.example.android.inventorymanager.Models.InventoryListItem;
@@ -83,67 +84,72 @@ public class Inventory extends AppCompatActivity {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+        if (Utils.isOnline()) {
+            int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_sort_by_name) {
-            mFirebaseAdapter = new FirebaseRecyclerAdapter<InventoryListItem,InventoryItemListViewHolder>(InventoryListItem.class,R.layout.inventory_list_item,InventoryItemListViewHolder.class,mItemsReference.orderByChild("Name")) {
+            //noinspection SimplifiableIfStatement
+            if (id == R.id.action_sort_by_name) {
+                mFirebaseAdapter = new FirebaseRecyclerAdapter<InventoryListItem, InventoryItemListViewHolder>(InventoryListItem.class, R.layout.inventory_list_item, InventoryItemListViewHolder.class, mItemsReference.orderByChild("Name")) {
 
-                @Override
-                protected void populateViewHolder(InventoryItemListViewHolder holder, InventoryListItem item, int position) {
+                    @Override
+                    protected void populateViewHolder(InventoryItemListViewHolder holder, InventoryListItem item, int position) {
 
-                    item.id = getRef(position).getKey();
-                    //Log.v("Item Detail",item.id);
+                        item.id = getRef(position).getKey();
+                        //Log.v("Item Detail",item.id);
 
-                    holder.bindInventoryListItem(item);
-                }
-            };
-            mLayoutManager = new LinearLayoutManager(this);
-            mRecyclerView.setAdapter(mFirebaseAdapter);
-            mRecyclerView.setLayoutManager(mLayoutManager);
+                        holder.bindInventoryListItem(item);
+                    }
+                };
+                mLayoutManager = new LinearLayoutManager(this);
+                mRecyclerView.setAdapter(mFirebaseAdapter);
+                mRecyclerView.setLayoutManager(mLayoutManager);
+            } else if (id == R.id.action_sort_by_latest) {
+                mFirebaseAdapter = new FirebaseRecyclerAdapter<InventoryListItem, InventoryItemListViewHolder>(InventoryListItem.class, R.layout.inventory_list_item, InventoryItemListViewHolder.class, mItemsReference.orderByPriority()) {
+
+                    @Override
+                    protected void populateViewHolder(InventoryItemListViewHolder holder, InventoryListItem item, int position) {
+
+                        item.id = getRef(position).getKey();
+                        //Log.v("Item Detail",item.id);
+
+                        holder.bindInventoryListItem(item);
+                    }
+                };
+
+                mLayoutManager = new LinearLayoutManager(this);
+                mLayoutManager.setReverseLayout(true);
+                mLayoutManager.setStackFromEnd(true);
+
+                mRecyclerView.swapAdapter(mFirebaseAdapter, false);
+                mRecyclerView.setLayoutManager(mLayoutManager);
+            } else if (id == R.id.action_sort_by_quantity) {
+                mFirebaseAdapter = new FirebaseRecyclerAdapter<InventoryListItem, InventoryItemListViewHolder>(InventoryListItem.class, R.layout.inventory_list_item, InventoryItemListViewHolder.class, mItemsReference.orderByChild("Quantity")) {
+
+                    @Override
+                    protected void populateViewHolder(InventoryItemListViewHolder holder, InventoryListItem item, int position) {
+
+                        item.id = getRef(position).getKey();
+                        //Log.v("Item Detail",item.id);
+
+                        holder.bindInventoryListItem(item);
+                    }
+                };
+                mLayoutManager = new LinearLayoutManager(this);
+                mLayoutManager.setReverseLayout(true);
+                mLayoutManager.setStackFromEnd(true);
+
+                mRecyclerView.swapAdapter(mFirebaseAdapter, false);
+                mRecyclerView.setLayoutManager(mLayoutManager);
+
+            }
+
+
+
+
         }
-        else if (id == R.id.action_sort_by_latest) {
-            mFirebaseAdapter = new FirebaseRecyclerAdapter<InventoryListItem,InventoryItemListViewHolder>(InventoryListItem.class,R.layout.inventory_list_item,InventoryItemListViewHolder.class,mItemsReference.orderByPriority()) {
-
-                @Override
-                protected void populateViewHolder(InventoryItemListViewHolder holder, InventoryListItem item, int position) {
-
-                    item.id = getRef(position).getKey();
-                    //Log.v("Item Detail",item.id);
-
-                    holder.bindInventoryListItem(item);
-                }
-            };
-
-            mLayoutManager = new LinearLayoutManager(this);
-            mLayoutManager.setReverseLayout(true);
-            mLayoutManager.setStackFromEnd(true);
-
-            mRecyclerView.swapAdapter(mFirebaseAdapter,false);
-            mRecyclerView.setLayoutManager(mLayoutManager);
+        else{
+            Toast.makeText(this,"No Network",Toast.LENGTH_SHORT).show();
         }
-        else if (id == R.id.action_sort_by_quantity) {
-            mFirebaseAdapter = new FirebaseRecyclerAdapter<InventoryListItem,InventoryItemListViewHolder>(InventoryListItem.class,R.layout.inventory_list_item,InventoryItemListViewHolder.class,mItemsReference.orderByChild("Quantity")) {
-
-                @Override
-                protected void populateViewHolder(InventoryItemListViewHolder holder, InventoryListItem item, int position) {
-
-                    item.id = getRef(position).getKey();
-                    //Log.v("Item Detail",item.id);
-
-                    holder.bindInventoryListItem(item);
-                }
-            };
-            mLayoutManager = new LinearLayoutManager(this);
-            mLayoutManager.setReverseLayout(true);
-            mLayoutManager.setStackFromEnd(true);
-
-            mRecyclerView.swapAdapter(mFirebaseAdapter,false);
-            mRecyclerView.setLayoutManager(mLayoutManager);
-
-        }
-
-
         return super.onOptionsItemSelected(item);
     }
     @Override

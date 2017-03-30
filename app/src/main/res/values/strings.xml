@@ -159,4 +159,7 @@
     <string name="sell_unit">Sell Unit</string>
     <string name="add_unit">Add Unit</string>
 
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
 </resources>

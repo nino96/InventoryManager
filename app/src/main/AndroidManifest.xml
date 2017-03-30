@@ -34,7 +34,10 @@
         <activity
             android:name=".Inventory"
             android:label="@string/title_activity_inventory"></activity>
-        <activity android:name=".InventoryItemDetail"></activity>
+        <activity android:name=".InventoryItemDetail"
+            android:theme="@style/AppTheme.NoActionBar">
+
+        </activity>
     </application>
 
 </manifest>
