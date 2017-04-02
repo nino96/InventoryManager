@@ -2,6 +2,7 @@ package com.example.android.inventorymanager;
 
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -10,6 +11,7 @@ import android.widget.TextView;
 
 import com.example.android.inventorymanager.Models.ItemDetail;
 import com.example.android.inventorymanager.Utilities.Utils;
+import com.github.mikephil.charting.charts.Chart;
 import com.github.mikephil.charting.charts.PieChart;
 import com.github.mikephil.charting.components.Description;
 import com.github.mikephil.charting.components.Legend;
@@ -153,6 +155,17 @@ public class PieChartActivity extends AppCompatActivity {
     private void createPieChart()
     {
         // create pieDataSet
+        if(yValues.size()==0){
+            mPieChart.clear();
+
+            mPieChart.setNoDataText("No items/transactions");
+            Paint p = mPieChart.getPaint(Chart.PAINT_INFO);
+            p.setTextSize(40f);
+            p.setColor(Color.BLACK);
+            mPieChart.invalidate();
+            return;
+        }
+
         PieDataSet dataSet = new PieDataSet(yValues, "");
         dataSet.setSliceSpace(3);
         dataSet.setSelectionShift(5);
