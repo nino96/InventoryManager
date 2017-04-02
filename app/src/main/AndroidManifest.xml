@@ -21,7 +21,7 @@
         <activity android:name=".AddItemActivity" />
         <activity
             android:name=".LauncherActivity"
-            android:theme="@android:style/Theme.NoDisplay">
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -33,11 +33,12 @@
         <activity android:name=".Authentication.ResetPasswordActivity" />
         <activity
             android:name=".Inventory"
-            android:label="@string/title_activity_inventory"></activity>
-        <activity android:name=".InventoryItemDetail"
-            android:theme="@style/AppTheme.NoActionBar">
-
-        </activity>
+            android:label="@string/title_activity_inventory" />
+        <activity
+            android:name=".InventoryItemDetail"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".VisualizationActivity" />
+        <activity android:name=".PieChartActivity"></activity>
     </application>
 
 </manifest>

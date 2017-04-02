@@ -71,10 +71,12 @@ public class BusinessHome extends AppCompatActivity
         mAddItemButton = (Button) findViewById(R.id.bt_add_item);
         mViewInventoryButton = (Button) findViewById(R.id.bt_view_inventory);
         mAddMemberButton = (Button) findViewById(R.id.bt_add_member);
+        Button mVisualizationsButton = (Button) findViewById(R.id.bt_visualizations);
 
         mAddItemButton.setOnClickListener(this);
         mViewInventoryButton.setOnClickListener(this);
         mAddMemberButton.setOnClickListener(this);
+        mVisualizationsButton.setOnClickListener(this);
 
 
         /*DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -203,6 +205,11 @@ public class BusinessHome extends AppCompatActivity
                     });
                     builder.show();
 
+                    break;
+
+                case R.id.bt_visualizations:
+                    intent = new Intent(this,VisualizationActivity.class);
+                    startActivity(intent);
                     break;
 
 

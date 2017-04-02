@@ -38,4 +38,12 @@
         android:text="@string/add_member"
         />
 
+    <Button
+        android:id="@+id/bt_visualizations"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.Button"
+        android:text="@string/visualizations"
+        />
+
 </LinearLayout>
