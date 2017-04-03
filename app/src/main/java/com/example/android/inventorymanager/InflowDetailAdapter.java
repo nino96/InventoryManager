@@ -8,7 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.example.android.inventorymanager.Models.InflowDetail;
+import com.example.android.inventorymanager.Models.TransactionDetail;
 
 import java.util.ArrayList;
 
@@ -17,15 +17,16 @@ import java.util.ArrayList;
  */
 
 public class InflowDetailAdapter extends RecyclerView.Adapter<InflowDetailAdapter.InflowDetailViewHolder> {
-    private ArrayList<InflowDetail> mList;
+    private ArrayList<TransactionDetail> mList;
 
-    public InflowDetailAdapter(ArrayList<InflowDetail> list){
+    public InflowDetailAdapter(ArrayList<TransactionDetail> list){
         mList = list;
     }
 
     @Override
     public InflowDetailViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(parent.getContext()).inflate(android.R.layout.simple_list_item_2,parent,false);
+        View itemView = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.row_inflow, parent, false);
 
         return new InflowDetailViewHolder(itemView);
     }
@@ -37,8 +38,11 @@ public class InflowDetailAdapter extends RecyclerView.Adapter<InflowDetailAdapte
 
     @Override
     public void onBindViewHolder(InflowDetailViewHolder holder, int position) {
-        InflowDetail inflow = mList.get(position);
-        holder.bindInflowListItem(inflow);
+        TransactionDetail inflow = mList.get(position);
+        holder.tv1.setText("Selling Price:"+inflow.amount);
+        holder.tv2.setText("Sold By:"+inflow.user);
+        holder.tv3.setText("Trans Date:"+inflow.timestamp);
+        //holder.tv4.setText("Quantity Sold:"+inflow.quantity);
     }
 
     @Override
@@ -47,27 +51,19 @@ public class InflowDetailAdapter extends RecyclerView.Adapter<InflowDetailAdapte
     }
 
     public class InflowDetailViewHolder extends RecyclerView.ViewHolder {
-        View mView;
-        Context mContext;
-        TextView tv1,tv2;
+        TextView tv1,tv2,tv3,tv4;
 
 
 
-        public InflowDetailViewHolder(View itemView){
-            super(itemView);
-            mView = itemView;
-            mContext = itemView.getContext();
-            tv1 = (TextView) itemView.findViewById(android.R.id.text1);
-            tv2 = (TextView) itemView.findViewById(android.R.id.text2);
+        public InflowDetailViewHolder(View View){
+            super(View);
+            tv1 = (TextView) itemView.findViewById(R.id.tv_selling_price);
+            tv2 = (TextView) itemView.findViewById(R.id.tv_seller);
+            tv3 = (TextView) itemView.findViewById(R.id.tv_time_sold);
+            tv4 = (TextView) itemView.findViewById(R.id.tv_sold_quantity);
 
         }
 
-        public void bindInflowListItem(InflowDetail item){
-
-            tv1.setText(item.name);
-            tv1.setTypeface(null,Typeface.BOLD);
-            tv2.setText(item.amt);
-        }
     }
 
 }
