@@ -90,11 +90,12 @@ public class PieChartActivity extends AppCompatActivity {
 
     private void setDataValues()
     {
-        yValues = new ArrayList<>();
+
         if (choice == 1) {
             mItemsReference.orderByChild("Quantity").limitToLast(5).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
+                    yValues = new ArrayList<>();
 
                     ArrayList<ItemDetail> list = new ArrayList<ItemDetail>();
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
@@ -116,6 +117,9 @@ public class PieChartActivity extends AppCompatActivity {
             mTransactionReference.addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
+
+                    //need to clear arraylist inside the listener, since outside code not executed on ValueEvent
+                    yValues = new ArrayList<>();
 
                     ArrayList<ItemDetail> list = new ArrayList<ItemDetail>();
                     for (DataSnapshot snapshot : dataSnapshot.getChildren())
