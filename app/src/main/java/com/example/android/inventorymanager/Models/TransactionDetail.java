@@ -8,7 +8,7 @@ import java.util.Date;
 
 public class TransactionDetail {
     public String user;
-    public int amount;
+    public long amount;
     public long timestamp;
     //public String quantity;
 

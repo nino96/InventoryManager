@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -26,6 +27,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 
 
@@ -40,7 +43,7 @@ public class ItemTransactionInflowFragment extends Fragment {
 
     private LinearLayout mParent;
     private RecyclerView mDetails;
-    private ArrayList<TransactionDetail> mList;
+    private ArrayList<TransactionDetail> mList = new ArrayList<>();
 
     private Button mSellItem;
     private Button mAddItem;
@@ -79,10 +82,10 @@ public class ItemTransactionInflowFragment extends Fragment {
         businessName = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext()).getString("businessName",null);
         itemName = getActivity().getIntent().getExtras().getString("itemName");
         mTransactionReference = mFirebaseDatabase.getReference().child("businesses").child(businessName).child("transactions").child(itemName).child("inflow");
-        mList = getFieldValues();
+        getFieldValues();
         arrayAdapter = new InflowDetailAdapter(mList);
         mRecyclerView = (RecyclerView) v.findViewById(R.id.rv_inflow_detail);
-        mRecyclerView.setHasFixedSize(true);
+        //mRecyclerView.setHasFixedSize(true);
         mLayoutManager = new LinearLayoutManager(getActivity().getApplicationContext());
         mRecyclerView.setLayoutManager(mLayoutManager);
         mRecyclerView.setAdapter(arrayAdapter);
@@ -98,7 +101,8 @@ public class ItemTransactionInflowFragment extends Fragment {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for(DataSnapshot snapshot: dataSnapshot.getChildren()){
 
-                    for(DataSnapshot snapshot1 : snapshot.getChildren()){
+                    //final DataSnapshot snap = snapshot;
+                    /*for(DataSnapshot snapshot1 : snapshot.getChildren()){
                         String blah = snapshot1.getKey();
                         String ans = snapshot1.getValue().toString();
                         //i.value = snapshot.getValue().toString();
@@ -126,8 +130,58 @@ public class ItemTransactionInflowFragment extends Fragment {
 
                         Log.v("InflowDetail",i.user+" "+i.amount+" "+i.timestamp);
 
-                    }
-                    list.add(i);
+                    }*/
+                    String user = snapshot.child("user").getValue().toString();
+                    Long amount = (Long)snapshot.child("amount").getValue();
+                    Long timestamp = (Long)snapshot.child("timestamp").getValue();
+
+                    TransactionDetail item = new TransactionDetail();
+
+                    item.user = user;
+                    item.amount = amount;
+                    item.timestamp = timestamp;
+
+                    //Log.v("InflowDetail",item.user+" "+item.amount+" "+item.timestamp);
+
+
+                    mList.add(item);
+                    arrayAdapter.notifyDataSetChanged();
+
+
+                    /*Log.v("InflowFragment",user);
+
+                    DatabaseReference userRef = mFirebaseDatabase.getReference().child("users").child(user);
+                    userRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot1) {
+
+                            TransactionDetail item = new TransactionDetail();
+
+
+
+
+                            item.user = dataSnapshot1.child("username").getValue().toString();
+                            Log.v("UserName",item.user);
+
+                            item.amount = amount;
+                            item.timestamp = timestamp;
+
+                            //Log.v("InflowDetail",item.user+" "+item.amount+" "+item.timestamp);
+
+                            list.add(item);
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                            Log.v("Failure","Fails");
+                        }
+                    });*/
+
+
+
+
+
+
                 }
             }
 
@@ -136,6 +190,7 @@ public class ItemTransactionInflowFragment extends Fragment {
 
             }
         });
+
 
         return list;
     }

@@ -36,7 +36,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
                 android:layout_alignParentRight="true"
-                android:text="Sold By: Nishanth"
+
                 android:textColor="@color/white"
                 android:textStyle="bold"
                 android:textSize="18sp" />
@@ -47,7 +47,6 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentStart="true"
-                android:text="PRICE - 200"
                 android:textColor="@color/white"
                 android:textSize="18sp" />
 
@@ -57,7 +56,7 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentBottom="true"
                 android:layout_alignParentRight="true"
-                android:text="Quantity - 50"
+
                 android:textColor="@color/white"
                 android:textSize="18sp" />
 
