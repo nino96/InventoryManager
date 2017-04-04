@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -36,6 +37,7 @@ public class InventoryItemListViewHolder extends RecyclerView.ViewHolder impleme
         TextView mItemPrice = (TextView) mView.findViewById(R.id.tv_inventory_list_itemprice);
         TextView mItemQuantity = (TextView) mView.findViewById(R.id.tv_inventory_list_itemquantity);
 
+        //Log.v("ItemDetail",item.id);
 
         mItemName.setText(item.Name);
         mItemName.setTag(item.id);

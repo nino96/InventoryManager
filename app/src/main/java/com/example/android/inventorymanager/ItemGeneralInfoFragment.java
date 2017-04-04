@@ -155,7 +155,7 @@ public class ItemGeneralInfoFragment extends Fragment implements View.OnClickLis
             }
         }
         else{
-            Toast.makeText(getActivity(),"No Network",Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity().getApplicationContext(),"No Network",Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -220,7 +220,7 @@ public class ItemGeneralInfoFragment extends Fragment implements View.OnClickLis
 
 
                         if(text1.getText().toString().length()==0 || text2.getText().toString().length()==0){
-                            Toast.makeText(getActivity(),"Enter both fields",Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getActivity().getApplicationContext(),"Enter both fields",Toast.LENGTH_SHORT).show();
                         }
                         else{
                             final int p = Integer.parseInt(text1.getText().toString());
@@ -229,14 +229,14 @@ public class ItemGeneralInfoFragment extends Fragment implements View.OnClickLis
                             Log.v("ItemDetail",p+" "+qty);
 
                             if(quantity==0){
-                                Toast.makeText(getActivity(), "No Item to sell, Add Item", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getActivity().getApplicationContext(), "No Item to sell, Add Item", Toast.LENGTH_SHORT).show();
                                 alertDialog.dismiss();
                             }
                             else if(p<=0 || qty<=0) {
-                                Toast.makeText(getActivity(), "Enter non zero value", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getActivity().getApplicationContext(), "Enter non zero value", Toast.LENGTH_SHORT).show();
                             }
                             else if(qty>quantity) {
-                                Toast.makeText(getActivity(), "Enter quantity <= " + quantity, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getActivity().getApplicationContext(), "Enter quantity <= " + quantity, Toast.LENGTH_SHORT).show();
                             }
                             else{
 
@@ -264,7 +264,7 @@ public class ItemGeneralInfoFragment extends Fragment implements View.OnClickLis
                                         if(mToast!=null)
                                             mToast.cancel();
 
-                                        mToast = Toast.makeText(getActivity(),"Successful",Toast.LENGTH_SHORT);
+                                        mToast = Toast.makeText(getActivity().getApplicationContext().getApplicationContext(),"Successful",Toast.LENGTH_SHORT);
                                         mToast.show();
 
                                     }
@@ -291,7 +291,7 @@ public class ItemGeneralInfoFragment extends Fragment implements View.OnClickLis
 
                                     @Override
                                     public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
-                                        //Toast.makeText(getActivity(),"Successful",Toast.LENGTH_SHORT).show();
+                                        //Toast.makeText(getActivity().getApplicationContext(),"Successful",Toast.LENGTH_SHORT).show();
                                     }
                                 });
                                 //if all sold then remove item from database or maybe not
@@ -344,7 +344,7 @@ public class ItemGeneralInfoFragment extends Fragment implements View.OnClickLis
                     @Override
                     public void onClick(View v) {
                         if(input.getText().toString().length()==0){
-                            Toast.makeText(getActivity(),"Enter quantity",Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getActivity().getApplicationContext(),"Enter quantity",Toast.LENGTH_SHORT).show();
                         }
                         else{
 
@@ -375,7 +375,7 @@ public class ItemGeneralInfoFragment extends Fragment implements View.OnClickLis
                                     if(mToast!=null)
                                         mToast.cancel();
 
-                                    mToast = Toast.makeText(getActivity(),"Successful",Toast.LENGTH_SHORT);
+                                    mToast = Toast.makeText(getActivity().getApplicationContext().getApplicationContext(),"Successful",Toast.LENGTH_SHORT);
                                     mToast.show();
 
                                 }
@@ -403,7 +403,7 @@ public class ItemGeneralInfoFragment extends Fragment implements View.OnClickLis
 
                                 @Override
                                 public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
-                                    //Toast.makeText(getActivity(),"Successful",Toast.LENGTH_SHORT).show();
+                                    //Toast.makeText(getActivity().getApplicationContext(),"Successful",Toast.LENGTH_SHORT).show();
                                 }
                             });
                             //if all sold then remove item from database or maybe not

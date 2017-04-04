@@ -49,7 +49,10 @@ public class Inventory extends AppCompatActivity {
         mItemsReference = mFirebaseDatabase.getReference().child("businesses").child(businessName).child("items");
 
         mRecyclerView = (RecyclerView) findViewById(R.id.rv_item_list);
-        mRecyclerView.setHasFixedSize(true);
+
+        //This breaks sorting functionality, don't know why exactly
+        //mRecyclerView.setHasFixedSize(true);
+
         mLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
@@ -95,7 +98,8 @@ public class Inventory extends AppCompatActivity {
                     protected void populateViewHolder(InventoryItemListViewHolder holder, InventoryListItem item, int position) {
 
                         item.id = getRef(position).getKey();
-                        //Log.v("Item Detail",item.id);
+
+                        Log.v("ItemDetail",item.id);
 
                         holder.bindInventoryListItem(item);
                     }

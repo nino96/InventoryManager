@@ -65,10 +65,15 @@ public class ItemDetailAdapter extends RecyclerView.Adapter<ItemDetailAdapter.It
 
         public void bindInventoryListItem(ItemDetail item){
 
+
             tv1.setText(item.name);
             tv1.setTypeface(null,Typeface.BOLD);
             tv2.setText(item.value);
+
+            tv1.setTextSize(16);
+            tv2.setTextSize(14);
         }
+
     }
 
 }
