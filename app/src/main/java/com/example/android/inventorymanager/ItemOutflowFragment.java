@@ -36,7 +36,7 @@ import java.util.ArrayList;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ItemTransactionInflowFragment extends Fragment {
+public class ItemOutflowFragment extends Fragment {
 
     private TransactionDetail i = new TransactionDetail();
     private String itemId;
@@ -61,7 +61,7 @@ public class ItemTransactionInflowFragment extends Fragment {
     private RecyclerView mRecyclerView;
     private LinearLayoutManager mLayoutManager;
 
-    public ItemTransactionInflowFragment() {
+    public ItemOutflowFragment() {
         // Required empty public constructor
     }
 
@@ -82,7 +82,7 @@ public class ItemTransactionInflowFragment extends Fragment {
         Log.v("Inventory",pref.getString("businessName","null"));
         businessName = PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext()).getString("businessName",null);
         itemName = getActivity().getIntent().getExtras().getString("itemName");
-        mTransactionReference = mFirebaseDatabase.getReference().child("businesses").child(businessName).child("transactions").child(itemName).child("inflow");
+        mTransactionReference = mFirebaseDatabase.getReference().child("businesses").child(businessName).child("transactions").child(itemName).child("outflow");
         getFieldValues();
         arrayAdapter = new InflowDetailAdapter(mList);
         mRecyclerView = (RecyclerView) v.findViewById(R.id.rv_inflow_detail);

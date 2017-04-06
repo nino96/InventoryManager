@@ -275,6 +275,8 @@ public class AddItemActivity extends AppCompatActivity implements View.OnClickLi
                                 Log.v("Add Item", price + " " + quantity);
                                 transaction.put("amount", price * quantity);
                                 transaction.put("user", FirebaseAuth.getInstance().getCurrentUser().getUid());
+                                transaction.put("quantity",quantity);
+
                                 mTransactionReference.child(itemName).child("outflow").push().setValue(transaction);
 
                                 //set Total Transaction value

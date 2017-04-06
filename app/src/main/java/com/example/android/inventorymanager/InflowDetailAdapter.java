@@ -45,7 +45,7 @@ public class InflowDetailAdapter extends RecyclerView.Adapter<InflowDetailAdapte
     }
 
     @Override
-    public void onBindViewHolder(InflowDetailViewHolder holder, int position) {
+    public void onBindViewHolder(final InflowDetailViewHolder holder, int position) {
 
         final InflowDetailViewHolder holder_copy = holder;
         final TransactionDetail inflow = mList.get(position);
@@ -56,15 +56,16 @@ public class InflowDetailAdapter extends RecyclerView.Adapter<InflowDetailAdapte
             public void onDataChange(DataSnapshot dataSnapshot1) {
 
                 String username = dataSnapshot1.child("username").getValue().toString();
-                holder_copy.tv1.setText("Sell Price : "+Long.toString(inflow.amount));
+                holder_copy.tv1.setText("\u20B9"+" "+Long.toString(inflow.amount));
 
                 //Log.v("InflowAdapter",inflow.user);
-                holder_copy.tv2.setText("User : "+username);
+                holder_copy.tv2.setText(username);
 
                 SimpleDateFormat sfd = new SimpleDateFormat("dd-MM-yyyy");
 
 
-                holder_copy.tv3.setText("Date : "+sfd.format(new Date(inflow.timestamp)));
+                holder_copy.tv3.setText(sfd.format(new Date(inflow.timestamp)));
+                holder_copy.tv4.setText(Long.toString(inflow.quantity));
 
             }
 

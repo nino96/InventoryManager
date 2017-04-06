@@ -245,6 +245,8 @@ public class ItemGeneralInfoFragment extends Fragment implements View.OnClickLis
                                 transaction.put("timestamp", ServerValue.TIMESTAMP);
                                 transaction.put("amount", p * qty);
                                 transaction.put("user", FirebaseAuth.getInstance().getCurrentUser().getUid());
+                                transaction.put("quantity",qty);
+
                                 mTransactionReference.child("inflow").push().setValue(transaction);
 
                                 mTransactionReference.child("total_inflow").runTransaction(new Transaction.Handler() {
@@ -300,8 +302,10 @@ public class ItemGeneralInfoFragment extends Fragment implements View.OnClickLis
                                 mItemReference.child("Quantity").setPriority(2);
 
                                 //update the member variable quantity
-                                mList.set(2,quantity_text_view);
-                                quantity = Integer.parseInt(mList.get(2).value);
+                                //mList.set(2,quantity_text_view);
+                                //quantity = Integer.parseInt(mList.get(2).value);
+                                getFieldValues();
+
                                 Log.v("Quantity",quantity+"");
 
                                 alertDialog.dismiss();
@@ -356,6 +360,8 @@ public class ItemGeneralInfoFragment extends Fragment implements View.OnClickLis
                             transaction.put("timestamp", ServerValue.TIMESTAMP);
                             transaction.put("amount", p * qty);
                             transaction.put("user", FirebaseAuth.getInstance().getCurrentUser().getUid());
+                            transaction.put("quantity",qty);
+
                             mTransactionReference.child("outflow").push().setValue(transaction);
 
                             mTransactionReference.child("total_outflow").runTransaction(new Transaction.Handler() {
@@ -381,7 +387,7 @@ public class ItemGeneralInfoFragment extends Fragment implements View.OnClickLis
                                 }
                             });
 
-
+                            Log.v("ItemGeneralInflowBefore",quantity+"");
 
                             //hardcoding the retrieval of quantity field since always going to be 3rd field in the list
                             final ItemDetail quantity_text_view = mList.get(2);
@@ -412,8 +418,11 @@ public class ItemGeneralInfoFragment extends Fragment implements View.OnClickLis
                             mItemReference.child("Quantity").setPriority(2);
 
                             //update the member variable quantity
-                            mList.set(2,quantity_text_view);
-                            quantity = Integer.parseInt(mList.get(2).value);
+                            //mList.set(2,quantity_text_view);
+                            //quantity = Integer.parseInt(mList.get(2).value);
+                            getFieldValues();
+
+                            Log.v("ItemGeneralInflow",quantity+"");
 
 
                             alertDialog.dismiss();

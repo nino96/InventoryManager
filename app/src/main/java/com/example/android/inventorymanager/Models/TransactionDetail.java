@@ -10,6 +10,7 @@ public class TransactionDetail {
     public String user;
     public long amount;
     public long timestamp;
+    public long quantity;
     //public String quantity;
 
 }

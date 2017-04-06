@@ -41,6 +41,7 @@ public class InventoryItemDetail extends AppCompatActivity{
         ViewPagerAdapter adapter = new ViewPagerAdapter(getSupportFragmentManager());
         adapter.addFragment(new ItemGeneralInfoFragment(),"INFO");
         adapter.addFragment(new ItemTransactionInflowFragment(),"INFLOW");
+        adapter.addFragment(new ItemOutflowFragment(),"OUTFLOW");
         viewPager.setAdapter(adapter);
     }
 
